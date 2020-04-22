@@ -4,7 +4,7 @@
     "scripts": {
         "client": "cd client && yarn start",
         "server": "nodemon server.js",
-        "dev": "concurrnetly --kill-others-on fail \"yarn server\" \"yarn client\""
+        "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
     },
     "dependencies": {
         "body-parser": "^1.18.3",
@@ -12,6 +12,6 @@
         "nodemon": "^2.0.3"
     },
     "devDependencies": {
-        "concurrently": "^4.1.0"
+        "concurrently": "^4.1.2"
     }
 }
