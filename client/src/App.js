@@ -2,11 +2,18 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Customer from './components/customer';
+import CustomerAdd from './components/customerAdd';
 import axios from 'axios';
 import { render } from '@testing-library/react';
 import Table from '@material-ui/core/Table'
 import TableHead from '@material-ui/core/TableHead'
-import { TableCell, TableBody,TableRow,withStyles,Paper,CircularProgress } from '@material-ui/core';
+import { TableCell, TableBody,TableRow,withStyles,Paper,CircularProgress, Grid } from '@material-ui/core';
+import Login from './route/login'
+import DashBoard from './route/dashBoard'
+import Head from './Head/head'
+
+import {BrowserRouter as Router, Route} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 
 const styles = theme =>({
   root:{
@@ -22,94 +29,50 @@ const styles = theme =>({
   }
 
 })
-
 class App extends Component {
   constructor(props){
     super(props);
-
     this.state ={
+      loginuser:"",
       customer : "",
-      comple : 0
+      comple : 0,
+      logcheck : 1
     }
     // this.callApi = this.callApi.bind(this);
+    this.changeUser = this.changeUser.bind(this);
+    this.logoutfunc = this.logoutfunc.bind(this);
   }
-  /*
-  life 사이클
-    constroctor <- 데이터 생성부분
-
-    componentwillMount
-
-    render <- 실제 뷰 생성구간
-
-    componentDidMount()
-
-
-    props or state가 재설정 되는경우 => shouldComponentUpdate()
-  */
-
-  progress = () =>{
-    const {comple} = this.state
-    this.setState({comple:comple>=100 ? 0 : comple + 1});
+  
+  logoutfunc(){
+    this.setState({
+      loginuser : ""
+    })
   }
 
-  componentDidMount(){
-    if(this.state.customer == ""){
-      this.timer = setInterval(this.progress,20);
-    }
-    this.callApi().then(res => this.setState({customer: res})).catch(err => console.log(err)
-    )
-    console.log(this.state.customer);
+  changeUser(){
+    this.setState({
+      loginuser : window.sessionStorage.getItem('user')
+    })
   }
-  callApi = async () =>{
-  try{
-    const data = await axios.get('/api/customers');
-    return data.data;
-  }catch (err){
-    console.log(err);
-  }
-  // const response = await fetch('/api/customers');
-  // const body = await response.json();
-  // console.log(body);
-  // return body;
-}
+
   render() {
     const { classes } = this.props;
-    
+    console.log(this.state.loginuser);
       return (
-          <Paper className={classes.root}>
-            <Table className={classes.table}>
-                  <TableHead>
-                    <TableRow>
-                    <TableCell>
-                      ID
-                    </TableCell>
-                    <TableCell>
-                      Image
-                    </TableCell>
-                    <TableCell>
-                      이름
-                    </TableCell>
-                    <TableCell>
-                      성별
-                    </TableCell>
-                    <TableCell>
-                      주소
-                    </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                  {this.state.customer ? this.state.customer.map(c =>{return( <Customer key={c.id} id={c.id} name={c.name} image={c.image} gender={c.gender} address={c.address}/>)}) : 
-                    <TableRow>
-                      <TableCell colSpan="6" align="center">
-                          <CircularProgress className={classes.progress} variant="determinate" value={this.state.comple}></CircularProgress>
-                      </TableCell>
-                    </TableRow>
-                  }
-                  </TableBody>
-            </Table>
-          </Paper>
+        <div>
+          <Head loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>
+          <Router>
+            {window.sessionStorage.getItem('user') ? <Redirect to="/dashboard"/> : <Redirect to="/login"/>}
+            <Route path="/login" component={() => <Login logcheck={this.state.logcheck} loginuser={this.state.loginuser} changeUser={this.changeUser} />} />
+            <Route path="/dashboard" component={() => <DashBoard loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>}/>
+          </Router>
+        </div>
+        
       );
-    } 
+    }
 }
-
 export default withStyles(styles)(App);
+
+
+
+ 
