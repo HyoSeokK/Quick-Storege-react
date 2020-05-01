@@ -9,9 +9,9 @@ import DraftsIcon from '@material-ui/icons/Drafts';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import ShareIcon from '@material-ui/icons/Share';
 import ComputerIcon from '@material-ui/icons/Computer';
-import FileList from '../components/fileList';
-import FileDetail from '../reduce/fileDetail'
-import './css/dashBoard.css'
+import FileList from '../containers/fileList';
+import FileDetail from '../containers/fileDetail';
+import './css/dashBoard.css';
 
 export default class FileSystem extends React.Component{
     constructor(props){
