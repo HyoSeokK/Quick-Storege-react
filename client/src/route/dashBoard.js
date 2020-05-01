@@ -9,6 +9,9 @@ import DraftsIcon from '@material-ui/icons/Drafts';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import ShareIcon from '@material-ui/icons/Share';
 import ComputerIcon from '@material-ui/icons/Computer';
+import FileList from '../reduce/fileList';
+import FileDetail from '../reduce/fileDetail'
+import './css/dashBoard.css'
 
 export default class FileSystem extends React.Component{
     constructor(props){
@@ -35,7 +38,7 @@ export default class FileSystem extends React.Component{
         console.log(this.state.loginuser);
         
         return(
-            <div>
+            <div className='dashBoard'>
                 <Grid container spacing={1}>
                     <Grid item xs>
                         <List component="nav" aria-label="main mailbox folders">
@@ -64,11 +67,11 @@ export default class FileSystem extends React.Component{
                     </Grid>
                     <Grid item xs={8}>
                         {/* 여기가 리스트 들어갈곳! */}
-                        
+                        <FileList/>
                     </Grid>
                     <Grid item xs={2}>
                         {/* 여기는 파일 상세정보 */}
-
+                        <FileDetail />
                     </Grid>
                 </Grid>
             </div>
