@@ -4,8 +4,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import Divider from '@material-ui/core/Divider';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
-import IconButton from '@material-ui/core/IconButton'
-import './css/fileList.css'
+import IconButton from '@material-ui/core/IconButton';
+import './css/fileList.css';
 
 
 
@@ -70,8 +70,9 @@ class List extends React.Component{
                             </TableRow>
                         </TableHead>
                         <TableBody >
+                            {/* 여기서부터 FileList 시작 */}
                             <TableRow hover>
-                                <TableCell style={{height:20}}>
+                                <TableCell>
                                     <Checkbox></Checkbox>
                                 </TableCell>
                                 <TableCell>
@@ -89,7 +90,7 @@ class List extends React.Component{
                                     </IconButton>
                                 </TableCell>
                             </TableRow>
-
+                            {/* 여기가 끝 */}
                         </TableBody>
                     </Table>
                 </TableContainer>

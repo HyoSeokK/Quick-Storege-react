@@ -15,6 +15,9 @@ import Head from './Head/head'
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import {Redirect} from 'react-router-dom';
 
+
+
+
 const styles = theme =>({
   root:{
     width: '100%',
