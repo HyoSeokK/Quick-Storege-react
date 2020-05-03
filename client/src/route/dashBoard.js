@@ -13,7 +13,7 @@ import FileList from '../containers/fileList';
 import FileDetail from '../containers/fileDetail';
 import './css/dashBoard.css';
 
-export default class FileSystem extends React.Component{
+class FileSystem extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -36,7 +36,6 @@ export default class FileSystem extends React.Component{
     }
     render(){
         console.log(this.state.loginuser);
-        
         return(
             <div className='dashBoard'>
                 <Grid container spacing={1}>
@@ -79,3 +78,5 @@ export default class FileSystem extends React.Component{
     }
 
 }
+
+export default FileSystem;

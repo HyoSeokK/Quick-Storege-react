@@ -100,13 +100,23 @@ app.get('/api/list',(req,res)=>{
                         file.date ? file.date = file.date + e + " " : file.date = e + " "
                     })
                     /////////////////////////////////////////////////
-
                     file.isFile = stats.isFile()
                     list.push(file)
                     
                 }
                  if(id == data.length - 1){
                      console.log(list);
+                     list.sort(function(a,b){
+                         var o1 = a['isFile'];
+                         var o2 = b['isFile'];
+                         var p1 = a['id'];
+                         var p2 = b['id'];
+                         if(o1 < o2) return -1;
+                         if(o1 > o2) return 1;
+                        if (p1 < p2) return -1;
+                        if (p1 > p2) return 1;
+                        return 0;
+                     })
                      res.send(list)
                  }
                 

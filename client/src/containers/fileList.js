@@ -6,6 +6,8 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import './css/fileList.css';
+import FileListDetail from '../containers/listdetail'
+import DescriptionIcon from '@material-ui/icons/Description';
 
 
 
@@ -55,10 +57,13 @@ class List extends React.Component{
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell>
+                                <TableCell style={{width:50}}>
                                     
                                 </TableCell>
-                                <TableCell>
+                                <TableCell style={{width:50}}>
+                                    <DescriptionIcon />
+                                </TableCell>
+                                <TableCell align={"center"}>
                                     이름
                                 </TableCell>
                                 <TableCell>
@@ -69,8 +74,8 @@ class List extends React.Component{
                                 </TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody >
-                            {/* 여기서부터 FileList 시작 */}
+                        {/* 여기서부터 FileList 시작 */}
+                        {/* <TableBody >  
                             <TableRow hover>
                                 <TableCell>
                                     <Checkbox></Checkbox>
@@ -90,8 +95,9 @@ class List extends React.Component{
                                     </IconButton>
                                 </TableCell>
                             </TableRow>
-                            {/* 여기가 끝 */}
-                        </TableBody>
+                        </TableBody> */}
+                        <FileListDetail />
+                        {/* 여기가 끝 */}
                     </Table>
                 </TableContainer>
                 </Paper>

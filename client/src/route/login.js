@@ -19,7 +19,6 @@ const styles = theme =>({
         alignItems: 'center',
         justifyContent:'center'
     }
-  
   })
 class Login extends React.Component{
     constructor(props){
@@ -72,6 +71,11 @@ class Login extends React.Component{
         this.setState(valchange);
     }
 
+
+    // 이름 : submitHandle
+    // 역할 : 로그인 버튼을 누르면 submit을 보내게되는데
+    // 이때 일반적인 submit처리가 아닌 나만의 로그인 처리를 가능하도록
+    // 설정하였음
     submitHandle(e){
         e.preventDefault();
         this.checkLogin().then((response) =>{
@@ -88,6 +92,10 @@ class Login extends React.Component{
         });
     }
 
+
+    //이름 : checkLogin
+    //역할 : 서버에 reestful 통신을 통해 내가 보낸 로그인 정보를 DB분석후
+    //     로그인 성공인지 아닌지에대한 체크 데이터를 보내줌
     checkLogin(){
         console.log(this.state.userid);
         this.setState({check:1});
@@ -124,4 +132,7 @@ class Login extends React.Component{
         );
     }
 } 
+
+
+
 export default withStyles(styles)(Login);
