@@ -74,7 +74,7 @@ const upload = multer({storage:storage});
 //        대상의 폴더를 지정하기 위해 현재디렉토리 위치의 교환을 위해
 //        sessionID(root폴더)에서부터 교환이 시작됨 폴더를 클릭하면 자연스럽게
 //        다음폴더를 넘어 갈수있게 req 값에 ID/dir/dir 이런식으로 전달하기
-app.get('/api/list',(req,res)=>{
+app.get('/api/list/',(req,res)=>{
     let list = new Array();
     var path = './upload/admin/'
     var id = 0;
@@ -105,7 +105,6 @@ app.get('/api/list',(req,res)=>{
                     
                 }
                  if(id == data.length - 1){
-                     console.log(list);
                      list.sort(function(a,b){
                          var o1 = a['isFile'];
                          var o2 = b['isFile'];

@@ -14,9 +14,17 @@ class FileListDetail extends Component{
     constructor(props){
         super(props)
     }
+    
     renderList(){
+        console.log("파일리스트 테스트");
+        console.log(this.props.loading);
+        console.log(this.props.fileList);
+        if(this.props.fileList==={}){
+            return(
+                <div>Nodata</div>
+            )
+        }else{
         return this.props.fileList.map((file)=>{
-            console.log(file);
             return(
                 <TableRow key={file.id} hover className="rowtable">
                     <TableCell align={"justify"} size="small">
@@ -36,26 +44,28 @@ class FileListDetail extends Component{
                      <IconButton aria-label="download">
                          <GetAppIcon></GetAppIcon>
                      </IconButton>
-                        <IconButton aria-label="download">
+                        <IconButton aria-label="Delete">
                         <DeleteIcon></DeleteIcon>
                      </IconButton>
                      </TableCell>
                 </TableRow>
             )
-        })
+        })}
     }
     render(){
         return(
             <TableBody>
-                {this.renderList()}
+                {this.props.loading ? <div>로딩중</div> : this.renderList()}
             </TableBody>
         )
     }
 }
-function mapStateToProps(state){
-    return{
-        fileList : state.Filelists
-    };
-}
 
-export default connect(mapStateToProps)(FileListDetail);
+
+export default connect(
+    (state)=>({
+        loading : state.FileList.pending,
+        error : state.FileList.error,
+        fileList : state.FileList.data
+    })
+)(FileListDetail);

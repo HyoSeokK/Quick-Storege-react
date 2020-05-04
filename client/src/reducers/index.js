@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 import FileList from './fileList'
 
 const rootReducer = combineReducers({
-  Filelists : FileList,
+  FileList,
 });
 
 export default rootReducer;

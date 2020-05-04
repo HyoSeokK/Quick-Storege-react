@@ -3,8 +3,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { withStyles,Paper,CircularProgress,Button,Container, Grid } from '@material-ui/core';
 import Axios from 'axios';
-import './css/login.css'
-import Route, { Redirect } from 'react-router-dom'
+import './css/login.css';
+import Route, { Redirect } from 'react-router-dom';
+import {connect} from 'react-redux';
+import {bindActionCreators, compose} from 'redux';
+import * as fileListAction from '../reducers/fileList'
 
 
 const styles = theme =>({
@@ -20,6 +23,7 @@ const styles = theme =>({
         justifyContent:'center'
     }
   })
+
 class Login extends React.Component{
     constructor(props){
         super(props)
@@ -35,6 +39,7 @@ class Login extends React.Component{
         this.handleValue = this.handleValue.bind(this);
         this.submitHandle = this.submitHandle.bind(this);
         this.checkLogin = this.checkLogin.bind(this);
+        this.getFFileList = this.getFFileList.bind(this);
     }
 
 
@@ -83,13 +88,25 @@ class Login extends React.Component{
                 this.setState({servermgs : "로그인을 정상적으로 하셨습니다"});
                 this.setState({logck : 0});
                 window.sessionStorage.setItem('user', this.state.userid);
+                this.getFFileList();
                 this.props.changeUser();
+                
             }else{
                 this.setState({servermgs : "아이디 비밀번호 재확인을 부탁드립니다"});
                 this.setState({logck : 1})
             }
             this.setState({check:0});
         });
+    }
+
+    async getFFileList(){
+        try{
+            console.log("접근성공");
+            await this.props.FileListAction.getFileList();
+        }catch(e){
+            console.log("에러발생");
+            throw(e)
+        }
     }
 
 
@@ -133,6 +150,10 @@ class Login extends React.Component{
     }
 } 
 
+// function mapDispathToProps(dispatch){
+//     return bindActionCreators(fileListAction,dispatch);
+//   }
 
-
-export default withStyles(styles)(Login);
+export default compose(withStyles(styles),connect(null,(dispatch)=>({
+    FileListAction : bindActionCreators(fileListAction,dispatch)
+})))(Login);
