@@ -64,21 +64,13 @@ const storage = multer.diskStorage({
 const upload = multer({storage:storage});
 ///////////////////////////////////////////////////////////////////
 
-
-
-
-
-// 역할 : /api/list/ 링크로 접근을 할시에 현재 디렉토리에 있는 파일목록을 줌
-//       또한 isFile이라는 태그를 통해 폴더 구별 가능
-// 사용법 : path의 경로를 바꿔주면 목록을 자연스럽게 불러오는데 이때 중요한것       
-//        대상의 폴더를 지정하기 위해 현재디렉토리 위치의 교환을 위해
-//        sessionID(root폴더)에서부터 교환이 시작됨 폴더를 클릭하면 자연스럽게
-//        다음폴더를 넘어 갈수있게 req 값에 ID/dir/dir 이런식으로 전달하기
-app.get('/api/list/',(req,res)=>{
-    let list = new Array();
-    var path = './upload/admin/'
-    var id = 0;
-    fs.readdir(path,(err,data)=>{
+app.get('/api/test/',(req,res)=>{
+    const linst = './upload/이거도 폴더임'
+    fs.readdir(linst,(err,data)=>{
+        if(err){
+            console.log("no file here");
+            res.send([{"data": "nodata"}])
+        }else{
         data.forEach(p =>{
             fs.stat(path+p,(err,stats)=>{
                 var file = new Object()
@@ -102,7 +94,6 @@ app.get('/api/list/',(req,res)=>{
                     /////////////////////////////////////////////////
                     file.isFile = stats.isFile()
                     list.push(file)
-                    
                 }
                  if(id == data.length - 1){
                      list.sort(function(a,b){
@@ -116,12 +107,79 @@ app.get('/api/list/',(req,res)=>{
                         if (p1 > p2) return 1;
                         return 0;
                      })
+                     console.log("전송선공");
                      res.send(list)
                  }
-                
                 id = id + 1
             })
-        })
+        })}
+    })
+})
+
+
+
+
+// 역할 : /api/list/ 링크로 접근을 할시에 현재 디렉토리에 있는 파일목록을 줌
+//       또한 isFile이라는 태그를 통해 폴더 구별 가능
+// 사용법 : path의 경로를 바꿔주면 목록을 자연스럽게 불러오는데 이때 중요한것       
+//        대상의 폴더를 지정하기 위해 현재디렉토리 위치의 교환을 위해
+//        sessionID(root폴더)에서부터 교환이 시작됨 폴더를 클릭하면 자연스럽게
+//        다음폴더를 넘어 갈수있게 req 값에 ID/dir/dir 이런식으로 전달하기
+app.post('/api/list/',(req,res)=>{
+    let list = new Array();
+    let linkpath = req.body.path;
+    console.log(linkpath);
+    var path = './upload'+linkpath+'/';
+    console.log(path);
+    var id = 0;
+    fs.readdir(path,(err,data)=>{
+        console.log(data.length);
+        if(data.length==0){
+            console.log("no file here");
+            res.send({data:"nodata"})
+        }else{
+        data.forEach(p =>{
+            fs.stat(path+p,(err,stats)=>{
+                var file = new Object()
+                if(err){
+                    console.log(err);
+                }else{
+                    file.id =  id
+                    file.name =  p
+                    /////////////////////////////////////////////////
+                    // stats.birthtime 
+                    // 값이 gpt 태평양 시간 값까지 나오기 떄문에 값정리를 위해
+                    // 분리하여 전달함
+                    var date = String(stats.birthtime)
+                    var datearr = date.split(" ",5)
+                    // file.date =  datearr
+                    datearr.forEach((e)=>{
+                        // filedate의 여부를 통한 날짜 데이터 좀더 깔끔하게
+                        // 데이터전달 삼항연산자 사용
+                        file.date ? file.date = file.date + e + " " : file.date = e + " "
+                    })
+                    /////////////////////////////////////////////////
+                    file.isFile = stats.isFile()
+                    list.push(file)
+                }
+                 if(id == data.length - 1){
+                     list.sort(function(a,b){
+                         var o1 = a['isFile'];
+                         var o2 = b['isFile'];
+                         var p1 = a['id'];
+                         var p2 = b['id'];
+                         if(o1 < o2) return -1;
+                         if(o1 > o2) return 1;
+                        if (p1 < p2) return -1;
+                        if (p1 > p2) return 1;
+                        return 0;
+                     })
+                     console.log("전송선공");
+                     res.send(list)
+                 }
+                id = id + 1
+            })
+        })}
     })
 })
 
@@ -130,16 +188,16 @@ app.get('/api/list/',(req,res)=>{
 // req.body 안에 매핑해서 보낸 키값을 연결해서 호출하면 데이터 불러올수있음
 // 
 app.post('/api/login',(req,res)=>{
-    console.log(req.body.pass);
     let sql = 'select * from userspace where username=? and pass=?'
     let username = req.body.username;
     let pass = req.body.pass;
     let param = [username,pass]
-    console.log(param);
     connection.query(sql,param,(err, rows, fields)=>{
     if(rows.length != 0){
+        console.log(username + "로그인 성공");
         res.send("ok");
     }else{
+        console.log("로그인 실패");
         res.send("n");
     }
     })

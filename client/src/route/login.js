@@ -8,7 +8,7 @@ import Route, { Redirect } from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators, compose} from 'redux';
 import * as fileListAction from '../reducers/fileList'
-
+import * as pathAction from '../reducers/pathSet'
 
 const styles = theme =>({
 
@@ -39,7 +39,7 @@ class Login extends React.Component{
         this.handleValue = this.handleValue.bind(this);
         this.submitHandle = this.submitHandle.bind(this);
         this.checkLogin = this.checkLogin.bind(this);
-        this.getFFileList = this.getFFileList.bind(this);
+        // this.getFFileList = this.getFFileList.bind(this);
     }
 
 
@@ -81,16 +81,19 @@ class Login extends React.Component{
     // 역할 : 로그인 버튼을 누르면 submit을 보내게되는데
     // 이때 일반적인 submit처리가 아닌 나만의 로그인 처리를 가능하도록
     // 설정하였음
+    //2020 05 05 변경사항) 초기 path == 유저아이디 저장을 위한 리덕스 엑션을 추가함
     submitHandle(e){
         e.preventDefault();
         this.checkLogin().then((response) =>{
             if(response.data == "ok"){
+                console.log("재접근 확인중");
                 this.setState({servermgs : "로그인을 정상적으로 하셨습니다"});
                 this.setState({logck : 0});
                 window.sessionStorage.setItem('user', this.state.userid);
-                this.getFFileList();
+                // this.getFFileList(window.sessionStorage.getItem('user'));
+                const user = window.sessionStorage.getItem('user');
+                this.props.PathAction.setPath(user);
                 this.props.changeUser();
-                
             }else{
                 this.setState({servermgs : "아이디 비밀번호 재확인을 부탁드립니다"});
                 this.setState({logck : 1})
@@ -99,15 +102,15 @@ class Login extends React.Component{
         });
     }
 
-    async getFFileList(){
-        try{
-            console.log("접근성공");
-            await this.props.FileListAction.getFileList();
-        }catch(e){
-            console.log("에러발생");
-            throw(e)
-        }
-    }
+    // async getFFileList(path){
+    //     try{
+    //         console.log("접근성공");
+    //         await this.props.FileListAction.getFileList(path);
+    //     }catch(e){
+    //         console.log("에러발생");
+    //         throw(e)
+    //     }
+    // }
 
 
     //이름 : checkLogin
@@ -115,11 +118,10 @@ class Login extends React.Component{
     //     로그인 성공인지 아닌지에대한 체크 데이터를 보내줌
     checkLogin(){
         console.log(this.state.userid);
+        console.log(window.sessionStorage.getItem('user'));
         this.setState({check:1});
         const url = '/api/login';
         const formData = new FormData();
-        formData.append('username',this.state.userid);
-        console.log(formData);
         return Axios.post(url,{ username:this.state.userid, pass:this.state.pass});
     }
 
@@ -154,6 +156,9 @@ class Login extends React.Component{
 //     return bindActionCreators(fileListAction,dispatch);
 //   }
 
-export default compose(withStyles(styles),connect(null,(dispatch)=>({
-    FileListAction : bindActionCreators(fileListAction,dispatch)
+export default compose(withStyles(styles),connect((state)=>({
+    path : state.PathSet.path
+}),(dispatch)=>({
+    FileListAction : bindActionCreators(fileListAction,dispatch),
+    PathAction : bindActionCreators(pathAction,dispatch)
 })))(Login);

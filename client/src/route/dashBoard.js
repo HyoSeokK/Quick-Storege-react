@@ -12,6 +12,9 @@ import ComputerIcon from '@material-ui/icons/Computer';
 import FileList from '../containers/fileList';
 import FileDetail from '../containers/fileDetail';
 import './css/dashBoard.css';
+import { bindActionCreators,compose } from 'redux';
+import {connect} from 'react-redux';
+import * as pathAction from '../reducers/pathSet'
 
 class FileSystem extends React.Component{
     constructor(props){
@@ -23,6 +26,7 @@ class FileSystem extends React.Component{
     }
     logout(){
         window.sessionStorage.removeItem('user');
+        this.props.PathAction.Logout();
         this.props.logoutfunc();
     }
     ListItemLink(props) {
@@ -79,4 +83,7 @@ class FileSystem extends React.Component{
 
 }
 
-export default FileSystem;
+export default connect(null,(dispatch)=>({
+    PathAction : bindActionCreators(pathAction,dispatch)
+    })
+)(FileSystem);
