@@ -39,7 +39,9 @@ export const getFileList = (path) => dispatch => {
         "id": 1,
         "name": "이거 폴더 맞는데",
         "date": "Fri May 01 2020 08:53:08 ",
-        "isFile": false
+        "isFile": false,
+        "size" : "",
+        "extension" : "nodata"
         },
     ]
     
@@ -65,7 +67,9 @@ export const getFileList = (path) => dispatch => {
               "id": 1,
               "name": "데이터가 없음",
               "date": "notfound",
-              "isFile": false
+              "isFile": false,
+              "size" : "",
+              "extension" : "nodata"
             }
           ]
         }

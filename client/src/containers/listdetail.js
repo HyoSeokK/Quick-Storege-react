@@ -1,19 +1,40 @@
 import React, { Component } from 'react';
-import { Breadcrumbs, Link, TableBody, TableRow,TableCell,Checkbox, withStyles} from '@material-ui/core';
+
+//마테리얼 UI 디자인 관련
+import { Breadcrumbs, Link, TableBody, TableRow,TableCell,Checkbox, withStyles, Button} from '@material-ui/core';
+import { sizing } from '@material-ui/system';
+//
+
+//아이콘 관련
 import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
+import DescriptionIcon from '@material-ui/icons/Description';
+import ImageIcon from '@material-ui/icons/Image';
 import HomeIcon from '@material-ui/icons/Home';
+import FolderIcon from '@material-ui/icons/Folder';
+import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
+//
+
+//리덕스 연결
 import { bindActionCreators,compose } from 'redux';
 import {connect} from 'react-redux';
-import FolderIcon from '@material-ui/icons/Folder';
-import { sizing } from '@material-ui/system';
-import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
+
 import * as fileListAction from '../reducers/fileList'
 import * as pathAction from '../reducers/pathSet'
+import * as selectFile from '../reducers/selectFile'
+//
 import './css/fileList.css'
 
 
+const styles = theme => ({
+    link : {
+        cursor:'pointer',
+        '&:hover':{
+            cursor:"pointer"
+        },
+    },
+});
 
 
 
@@ -80,8 +101,6 @@ class FileListDetail extends Component{
     async getFFileList(path){
         try{
             await this.props.FileListAction.getFileList(path);
-            console.log("현재들어간 경로");
-            console.log(path);
             this.setState({fileList : this.props.fileList})
         }catch(e){
             throw(e);
@@ -90,23 +109,22 @@ class FileListDetail extends Component{
 
     async listSelect(file){
         if(file.isFile){
+            await this.props.SelectFile.selFile(file);
         }else if(!file.isFile){
+            this.props.SelectFile.notFile();
             await this.props.PathAction.setPath(file.name);
-            console.log("------ list select ------");
-            console.log("------ props.change? ------");
-            console.log(this.props.path);
             await this.getFFileList(this.props.path);
             if(this.state.path!==this.props.path){
                 this.setState({path:this.props.path});
             }
         }
     }
+
     async removePath(){
         let repath = "";
         let data = this.props.path.split('/');
         let length = data.length;
         for(let i = 1 ; i < length-1; i++){
-            console.log("패스 제거 작업");
             repath = repath + "/" + data[i];
         }
         await this.props.PathAction.removePath(repath);
@@ -118,14 +136,15 @@ class FileListDetail extends Component{
 
     ////////////////////////////////////////////////////////
     renderback(){
+        const {classes} = this.props;
         return(
-            <TableRow hover className="rowtable">
+            <TableRow hover className="rowtable" >
                     <TableCell align={"justify"} size="small">
                     </TableCell>
                     <TableCell align={"justify"} size="small">
                     </TableCell>
                     <TableCell>
-                        <Link underline='none' color='inherit' onClick={() => this.removePath()}>상위폴더</Link>
+                        <Link underline='none' color='inherit' onClick={() => this.removePath()} className={classes.link}>상위폴더</Link>
                          {/* 이곳에 이벤트를 넣어서 처리를 폴더이동및 파일 전송 을 시작한다 */}
                     </TableCell>
                     <TableCell>
@@ -139,8 +158,8 @@ class FileListDetail extends Component{
                 </TableRow>
         )
     }
-    
     renderList(){
+        const {classes} = this.props;
         console.log("파일 path");
         console.log(this.props.fileList);
         if(this.props.fileList[0].date =="notfound"){
@@ -155,10 +174,11 @@ class FileListDetail extends Component{
                         <Checkbox></Checkbox>
                     </TableCell>
                     <TableCell align={"justify"} size="small">
-                        <FolderIcon style={{ fontSize: 20 }}/>
+                        {file.isFile ?  (file.extension == "jpg"? <ImageIcon style={{ fontSize: 20 }}/> : <DescriptionIcon style={{ fontSize: 20 }}/>):
+                        <FolderIcon style={{ fontSize: 20 }}/>}
                     </TableCell>
                     <TableCell>
-                        <Link underline='none' color='inherit' onClick={() => this.listSelect(file)}>{file.name}</Link>
+                        <Link underline='none' color='inherit' onClick={() => this.listSelect(file)} className={classes.link}>{file.name}</Link>
                          {/* 이곳에 이벤트를 넣어서 처리를 폴더이동및 파일 전송 을 시작한다 */}
                     </TableCell>
                     <TableCell>
@@ -173,6 +193,8 @@ class FileListDetail extends Component{
                      </IconButton>
                      </TableCell>
                 </TableRow>
+
+                
             )
         })}
     }
@@ -188,7 +210,7 @@ class FileListDetail extends Component{
 }
 
 
-export default connect(
+export default compose(withStyles(styles),connect(
     (state)=>({
         loading : state.FileList.pending,
         error : state.FileList.error,
@@ -196,6 +218,7 @@ export default connect(
         path : state.PathSet.path
     }),(dispatch)=>({
         FileListAction : bindActionCreators(fileListAction,dispatch),
-        PathAction : bindActionCreators(pathAction,dispatch)
+        PathAction : bindActionCreators(pathAction,dispatch),
+        SelectFile : bindActionCreators(selectFile,dispatch)
     })
-)(FileListDetail);
+))(FileListDetail);

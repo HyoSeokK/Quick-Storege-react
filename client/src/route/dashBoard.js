@@ -15,6 +15,7 @@ import './css/dashBoard.css';
 import { bindActionCreators,compose } from 'redux';
 import {connect} from 'react-redux';
 import * as pathAction from '../reducers/pathSet'
+import * as selfile from '../reducers/selectFile'
 
 class FileSystem extends React.Component{
     constructor(props){
@@ -27,6 +28,7 @@ class FileSystem extends React.Component{
     logout(){
         window.sessionStorage.removeItem('user');
         this.props.PathAction.Logout();
+        this.props.SelFile.notFile();
         this.props.logoutfunc();
     }
     ListItemLink(props) {
@@ -84,6 +86,7 @@ class FileSystem extends React.Component{
 }
 
 export default connect(null,(dispatch)=>({
-    PathAction : bindActionCreators(pathAction,dispatch)
+    PathAction : bindActionCreators(pathAction,dispatch),
+    SelFile : bindActionCreators(selfile,dispatch)
     })
 )(FileSystem);

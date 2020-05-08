@@ -62,7 +62,7 @@ class App extends Component {
     const { classes } = this.props;
     console.log(this.state.loginuser);
       return (
-        <div>
+        <div className="root">
           <Head loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>
           <Router>
             {window.sessionStorage.getItem('user') ? <Redirect to="/dashboard"/> : <Redirect to="/login"/>}

@@ -1,3 +1,8 @@
 .gray-background {
   background-color: gray;
 }
+
+.root{
+  overflow-y: hidden;
+  overflow-x: hidden;
+}

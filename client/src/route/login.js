@@ -11,7 +11,6 @@ import * as fileListAction from '../reducers/fileList'
 import * as pathAction from '../reducers/pathSet'
 
 const styles = theme =>({
-
     progress: {
       margin: theme.spacing.unit * 2
     },

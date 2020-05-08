@@ -45,6 +45,7 @@ connection.connect();
 
 
 
+
 // multer 라이브러리 파일의 업로드 다운로드에 대한 라이브러리
 // 
 const multer = require('multer');
@@ -64,57 +65,6 @@ const storage = multer.diskStorage({
 const upload = multer({storage:storage});
 ///////////////////////////////////////////////////////////////////
 
-app.get('/api/test/',(req,res)=>{
-    const linst = './upload/이거도 폴더임'
-    fs.readdir(linst,(err,data)=>{
-        if(err){
-            console.log("no file here");
-            res.send([{"data": "nodata"}])
-        }else{
-        data.forEach(p =>{
-            fs.stat(path+p,(err,stats)=>{
-                var file = new Object()
-                if(err){
-                    console.log(err);
-                }else{
-                    file.id =  id
-                    file.name =  p
-                    /////////////////////////////////////////////////
-                    // stats.birthtime 
-                    // 값이 gpt 태평양 시간 값까지 나오기 떄문에 값정리를 위해
-                    // 분리하여 전달함
-                    var date = String(stats.birthtime)
-                    var datearr = date.split(" ",5)
-                    // file.date =  datearr
-                    datearr.forEach((e)=>{
-                        // filedate의 여부를 통한 날짜 데이터 좀더 깔끔하게
-                        // 데이터전달 삼항연산자 사용
-                        file.date ? file.date = file.date + e + " " : file.date = e + " "
-                    })
-                    /////////////////////////////////////////////////
-                    file.isFile = stats.isFile()
-                    list.push(file)
-                }
-                 if(id == data.length - 1){
-                     list.sort(function(a,b){
-                         var o1 = a['isFile'];
-                         var o2 = b['isFile'];
-                         var p1 = a['id'];
-                         var p2 = b['id'];
-                         if(o1 < o2) return -1;
-                         if(o1 > o2) return 1;
-                        if (p1 < p2) return -1;
-                        if (p1 > p2) return 1;
-                        return 0;
-                     })
-                     console.log("전송선공");
-                     res.send(list)
-                 }
-                id = id + 1
-            })
-        })}
-    })
-})
 
 
 
@@ -160,6 +110,8 @@ app.post('/api/list/',(req,res)=>{
                     })
                     /////////////////////////////////////////////////
                     file.isFile = stats.isFile()
+                    file.size = stats.size;
+                    file.extension = p.split('.')[1];
                     list.push(file)
                 }
                  if(id == data.length - 1){
@@ -210,7 +162,7 @@ app.post('/api/login',(req,res)=>{
 // app의 보안성 관련 내용
 // 우리는 파일자체를 가져가야 되기떄문에 해당 내용은 나중에 서버에서
 // 로고파일 가져갈때 사용하기
-app.use('/image',express.static('./upload'));
+app.use('/data',express.static('./upload'));
 
 
 
