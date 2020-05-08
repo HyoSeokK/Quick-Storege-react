@@ -1,19 +1,26 @@
 import React from 'react';
-import { Breadcrumbs, Link, TableContainer, Table, TableHead, TableRow,TableCell, TableBody, Checkbox, Paper, styled ,makeStyles, withStyles} from '@material-ui/core';
 
+
+//UI 관련
+import { Breadcrumbs, Link, TableContainer, Table, TableHead, TableRow,TableCell, TableBody, Checkbox, Paper, styled ,makeStyles, withStyles} from '@material-ui/core';
 import HomeIcon from '@material-ui/icons/Home';
 import Divider from '@material-ui/core/Divider';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
-import './css/fileList.css';
 import FileListDetail from '../containers/listdetail'
 import DescriptionIcon from '@material-ui/icons/Description';
 
 
+// css
+import './css/fileList.css';
 
 
 
+
+
+//파일 목록 리스트화를 진행햐면서
+//일정이상 파일이 늘어났을때 게시판 스크롤링 처리
 const styles = theme => ({
     table: {
         maxHeight:800,
@@ -22,7 +29,9 @@ const styles = theme => ({
     },
 });
 
-
+// 이름 : List
+// 역할 : 상세한 파일리스트 내용을 담는 테이블을 
+//       가지고 있는곳
 class List extends React.Component{
     constructor(props){
         super(props)
@@ -54,29 +63,6 @@ class List extends React.Component{
                                 </TableCell>
                             </TableRow>
                         </TableHead>
-
-                        {/* 여기서부터 FileList 시작 */}
-                        {/* <TableBody >  
-                            <TableRow hover>
-                                <TableCell>
-                                    <Checkbox></Checkbox>
-                                </TableCell>
-                                <TableCell>
-                                    족제비.avi
-                                </TableCell>
-                                <TableCell>
-                                    2020.04.29
-                                </TableCell>
-                                <TableCell>
-                                <IconButton aria-label="download">
-                                        <GetAppIcon></GetAppIcon>
-                                    </IconButton>
-                                    <IconButton aria-label="download">
-                                        <DeleteIcon></DeleteIcon>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody> */}
                             <FileListDetail />
                         {/* 여기가 끝 */}
                     </Table>

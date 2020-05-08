@@ -28,7 +28,7 @@ class Head extends React.Component{
         this.logout = this.logout.bind(this);
     }
     
-
+    
     logout(){
         window.sessionStorage.removeItem('user');
         this.props.logoutfunc();

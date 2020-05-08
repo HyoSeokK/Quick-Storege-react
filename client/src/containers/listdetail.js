@@ -119,7 +119,15 @@ class FileListDetail extends Component{
             }
         }
     }
-
+    // 이름 : removePath()
+    // 역할 : 가장 최상위에 있는 위치값을 삭제후 filelist 재호출 합니다
+    // 1. path data 호출
+    // 2. path / => 기준으로 split
+    // 3. 0번 데이터는 "" 값이므로 1번 부터 호출
+    // 4. length - 1 을 통해 최종 데이터는 repath에 값을 넣지 않음
+    // 주의) 여기서 Path는 배열이 아닌 String 타입으로 관리를 하고 있습니다
+    //      각 데이터마다 분류는 / 단위를 통해 하고 있고 String으로 관리를 하여
+    //      서버와의 통신을 원할하게 불러오고 있습니다.
     async removePath(){
         let repath = "";
         let data = this.props.path.split('/');
@@ -135,6 +143,11 @@ class FileListDetail extends Component{
     }
 
     ////////////////////////////////////////////////////////
+
+
+
+    // 이름 : renderback()
+    // 역할 : removepath를 호출하기위한 "상위폴더" 이동 버튼을 담고 있는 View
     renderback(){
         const {classes} = this.props;
         return(
@@ -158,6 +171,10 @@ class FileListDetail extends Component{
                 </TableRow>
         )
     }
+
+
+    // 이름 : renderList()
+    // 역할 : getFileFFList를 통해 얻은 Redux안에 있는 File들을 종합하여 데이터를 View로 생성
     renderList(){
         const {classes} = this.props;
         console.log("파일 path");
@@ -212,11 +229,12 @@ class FileListDetail extends Component{
 
 export default compose(withStyles(styles),connect(
     (state)=>({
-        loading : state.FileList.pending,
-        error : state.FileList.error,
-        fileList : state.FileList.data,
-        path : state.PathSet.path
+        loading : state.FileList.pending,// 서버와의 통신중 상태(로딩)
+        error : state.FileList.error,// 서버간의 문제가 생김
+        fileList : state.FileList.data,// 실질 적인 데이터
+        path : state.PathSet.path // path데이터
     }),(dispatch)=>({
+        // 설정된 리덕스 엑션 관리
         FileListAction : bindActionCreators(fileListAction,dispatch),
         PathAction : bindActionCreators(pathAction,dispatch),
         SelectFile : bindActionCreators(selectFile,dispatch)

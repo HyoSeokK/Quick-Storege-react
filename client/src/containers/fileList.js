@@ -22,6 +22,9 @@ class FileList extends React.Component{
         this.renderpathlink = this.renderpathlink.bind(this);
     }
 
+    // 이름 : renderpathlink
+    // 역할 : redux에 저장되있는 path링크를 분해하여 현재 이동 경로를 표시한다.
+    // 개선사항: 필요 너무많은 이동을 했을때 처리방향?
     renderpathlink(){
         console.log("상단 패스 링크 제작중");
         
