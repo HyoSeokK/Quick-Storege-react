@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Axios from 'axios';
 
 //마테리얼 UI 디자인 관련
 import { Breadcrumbs, Link, TableBody, TableRow,TableCell,Checkbox, withStyles, Button} from '@material-ui/core';
@@ -14,6 +15,10 @@ import ImageIcon from '@material-ui/icons/Image';
 import HomeIcon from '@material-ui/icons/Home';
 import FolderIcon from '@material-ui/icons/Folder';
 import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
+import VideoLabelIcon from '@material-ui/icons/VideoLabel';
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import PublicIcon from '@material-ui/icons/Public';
+import ext from '../module/extension';
 //
 
 //리덕스 연결
@@ -45,6 +50,9 @@ class FileListDetail extends Component{
         this.getFFileList = this.getFFileList.bind(this);
         this.renderback = this.renderback.bind(this);
         this.removePath = this.removePath.bind(this);
+        this.filedownload = this.filedownload.bind(this);
+        this.filedelete = this.filedelete.bind(this);
+        this.iconselect = this.iconselect.bind(this);
         this.state = {
             path : this.props.path,
             fileList : this.props.fileList
@@ -119,6 +127,7 @@ class FileListDetail extends Component{
             }
         }
     }
+
     // 이름 : removePath()
     // 역할 : 가장 최상위에 있는 위치값을 삭제후 filelist 재호출 합니다
     // 1. path data 호출
@@ -171,14 +180,84 @@ class FileListDetail extends Component{
                 </TableRow>
         )
     }
+    //파일 관리 로직들 다운로드 / 삭제 
+    //파일 다운로드 로직
+    //작동 과정 
+    async filedownload(filename){
+        //Axios를 통해 서버 파일링크에 접속한후에 파일에 대한 데이터를 서버로부터 전달받는다.
+        //이떄 type blob <= 좀더 나중에 세밀하게 거치기 위해서는 정확한 타입 선정을 해야된다
+        return Axios.post(`/download/${filename}`, {path : this.props.path},{responseType:"blob"})
+        .then((res)=>{
+            var data = new Blob([res.data])
+            //window IE 낮은버전에서 작동하기위한 코드
+            if(typeof window.navigator.msSaveBlob ==='function'){
+                window.navigator.msSaveBlob(data,filename);
+            }else{
+                var blob = data;//파일 관련 데이터
+                var link = document.createElement('a');//a태그인 다운로드 링크 생성
+                //link 안에 있는 주소값을 우리가 다운받을 파일에 링크와 연결
+                link.href = window.URL.createObjectURL(blob);
+                //파일 다운로드 할떄 파일명 지정
+                link.download = filename;
+                //실제 적용되는 문서에 해당 링크 저장 할수있게 지정
+                document.body.appendChild(link);
+                //링크 클릭하여 다운로드 진행
+                link.click();
+            }
+        }).catch((error)=>{
+            console.log(error);
+        })
+    }
+
+    async filedelete(filename){
+        let check = Axios.post(`/delete/${filename}`,{path:this.props.path},{responseType:"text"})
+        await this.getFFileList(this.props.path);
+        this.props.SelectFile.notFile();
+
+    }
+
+    // 이름 ; iconselect()
+    // 역할 : List의 보여질 아이콘 정하기
+    // 작동원리 : file안에 들어있는 extention(확장자)를 통한 분석 후 맞는 아이콘 리턴
+    iconselect(fileext){
+        
+        if(!fileext.isFile){
+            return (
+                <FolderIcon style={{ fontSize: 20 }}/>
+            )
+        }else{
+            let result = ext(fileext.extension);
+            if(result == 'img'){
+                return (
+                    <ImageIcon style={{ fontSize: 20 }}/>
+                )
+            }else if(result == 'video'){
+                return (
+                    <VideoLabelIcon style={{ fontSize: 20 }}/>
+                )
+            }else if(result == 'zip'){
+                return (
+                    <PublicIcon style={{ fontSize: 20 }}/>
+                )
+            }else if(result == 'music'){
+                return(
+                    <AudiotrackIcon style={{fontSize:20}}/>
+                )
+            }else{
+                return(
+                    <DescriptionIcon style={{ fontSize: 20 }}/>
+                )
+            }
+        }
+    }
 
 
     // 이름 : renderList()
     // 역할 : getFileFFList를 통해 얻은 Redux안에 있는 File들을 종합하여 데이터를 View로 생성
     renderList(){
+        // onClick={()=>this.filedownload(file.name)}
         const {classes} = this.props;
-        console.log("파일 path");
-        console.log(this.props.fileList);
+        
         if(this.props.fileList[0].date =="notfound"){
             return(
                 <div></div>
@@ -191,8 +270,11 @@ class FileListDetail extends Component{
                         <Checkbox></Checkbox>
                     </TableCell>
                     <TableCell align={"justify"} size="small">
-                        {file.isFile ?  (file.extension == "jpg"? <ImageIcon style={{ fontSize: 20 }}/> : <DescriptionIcon style={{ fontSize: 20 }}/>):
-                        <FolderIcon style={{ fontSize: 20 }}/>}
+                        {/* {file.isFile ?  
+                        (file.extension == "jpg"? <ImageIcon style={{ fontSize: 20 }}/> 
+                        : <DescriptionIcon style={{ fontSize: 20 }}/>):
+                        <FolderIcon style={{ fontSize: 20 }}/>} */}
+                        {this.iconselect(file)}
                     </TableCell>
                     <TableCell>
                         <Link underline='none' color='inherit' onClick={() => this.listSelect(file)} className={classes.link}>{file.name}</Link>
@@ -202,10 +284,10 @@ class FileListDetail extends Component{
                          {file.date}
                     </TableCell>
                     <TableCell>
-                     <IconButton aria-label="download">
-                         <GetAppIcon></GetAppIcon>
+                     <IconButton aria-label="download" onClick={()=>this.filedownload(file.name)}>
+                         <GetAppIcon ></GetAppIcon>
                      </IconButton>
-                        <IconButton aria-label="Delete">
+                        <IconButton aria-label="Delete" onClick={()=>this.filedelete(file.name)}>
                         <DeleteIcon></DeleteIcon>
                      </IconButton>
                      </TableCell>
@@ -215,6 +297,9 @@ class FileListDetail extends Component{
             )
         })}
     }
+
+
+
 
     render(){
         return(

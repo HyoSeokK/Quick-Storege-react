@@ -48,27 +48,64 @@ connection.connect();
 
 // multer 라이브러리 파일의 업로드 다운로드에 대한 라이브러리
 // 
-const multer = require('multer');
-const storage = multer.diskStorage({
-    destination : (req,file,callback) =>{
-        callback(null,"upload");
-    },
-    //해당 아래의 설정을 하지 않으면 multer라이브러리가
-    //자동으로 암호화하여 데이터를 전달하게됨
-    filename:(req,file,callback)=>{
-        callback(null,file.originalname);
-        //file.originalname 을 통해 파일의 원형값을 받아 드릴수 있게함
-        //이것을 통해 파일명 암호화는 이부분을 건드리면된다는 것을 알수있음
-    }
-});
+// const multer = require('multer');
+// const storage = multer.diskStorage({
+//     destination : (req,file,callback) =>{
+//         callback(null,"upload");
+//     },
+//     //해당 아래의 설정을 하지 않으면 multer라이브러리가
+//     //자동으로 암호화하여 데이터를 전달하게됨
+//     filename:(req,file,callback)=>{
+//         callback(null,file.originalname);
+//         //file.originalname 을 통해 파일의 원형값을 받아 드릴수 있게함
+//         //이것을 통해 파일명 암호화는 이부분을 건드리면된다는 것을 알수있음
+//     }
+// });
 //해당 컨피그 값과 동기화 하는부분
-const upload = multer({storage:storage});
+// const upload = multer({storage:storage});
+let multer = require('multer');
+let fst = require('fs-extra');
+
+let upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, callback) => {
+      let path = req.body.path;
+      let filepath = './upload'+ path;
+      fst.mkdirsSync(filepath);
+      callback(null, filepath);
+    },
+    filename: (req, file, callback) => {
+      //originalname is the uploaded file's name with extn
+      callback(null, file.originalname);
+    }
+  })
+});
+
+// 이하 파일 관련 모듈
+app.post('/upload/:filename', upload.single('file'), (req, res) => {
+    console.log("접속완료");
+    console.log(req.body);
+    res.status(200).send();
+});
+
+app.post('/download/:filename',(req,res)=>{
+    let file = `./upload${req.body.path}/${req.params.filename}`;
+    console.log("전송 요청은 들어옴"+file);
+    res.download(file);
+})
+app.post('/delete/:filename',(req,res)=>{
+    let file = `./upload${req.body.path}/${req.params.filename}`;
+    fs.unlinkSync(file)
+    res.send('ok');
+    
+})
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////
-
-
-
-
-
 // 역할 : /api/list/ 링크로 접근을 할시에 현재 디렉토리에 있는 파일목록을 줌
 //       또한 isFile이라는 태그를 통해 폴더 구별 가능
 // 사용법 : path의 경로를 바꿔주면 목록을 자연스럽게 불러오는데 이때 중요한것       

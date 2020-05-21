@@ -22,7 +22,8 @@ const styles = theme =>({
         justifyContent:'center'
     }
   })
-
+// class : Login
+// 로그인을 진행하는 Routing 지점 컴포넌트 및 기능 포함
 class Login extends React.Component{
     constructor(props){
         super(props)

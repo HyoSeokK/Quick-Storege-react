@@ -13,6 +13,7 @@ import './css/fileDetail.css';
 import TitleIcon from '@material-ui/icons/Title';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import SettingsIcon from '@material-ui/icons/Settings';
+import ext from '../module/extension'
 
 //material UI 디자인 컨트롤
 const styles = theme => ({
@@ -82,22 +83,27 @@ class FileDetail extends React.Component{
                         <img src="/data/nodata.jpg" className='imagectr'/>
                 </Grid>
                 )
-        }else if(this.props.file.extension === "jpg"){
-            const filepath = `/data${this.props.path}/${this.props.file.name}`
-            console.log(`들어오고${filepath}`);
-            return(
-                <Grid item xs={12}>
-                    <img src={filepath} className='imagectr'/>
+        }else{   
+            let extck = ext(this.props.file.extension)
+            if(extck === "img"){
+                const filepath = `/data${this.props.path}/${this.props.file.name}`
+                console.log(`들어오고${filepath}`);
+                return(
+                    <Grid item xs={12}>
+                        <img src={filepath} className='imagectr'/>
+                    </Grid>
+                )
+            }else{
+                return(
+                <Grid item xs={12} className={classes.imageMag} align="center">
+                        <img src="/data/istextdata.jpg" className='imagectr'/>
                 </Grid>
-            )
-        }else{
-            return(
-            <Grid item xs={12} className={classes.imageMag} align="center">
-                    <img src="/data/istextdata.jpg" className='imagectr'/>
-            </Grid>
-            )
+                )
+            }
         }
     }
+
+    
     selfilestat(){
         const {classes} = this.props
         if(!this.props.file){
