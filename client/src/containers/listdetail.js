@@ -80,6 +80,7 @@ class FileListDetail extends Component{
             return true
         }else{
             return false
+     
         }
     }
 
@@ -270,7 +271,7 @@ class FileListDetail extends Component{
         // onClick={()=>this.filedownload(file.name)}
         const {classes} = this.props;
         
-        if(this.props.fileList[0].date =="notfound"){
+        if(!this.props.fileList ||this.props.fileList[0].date =="notfound"){
             return(
                 <div></div>
         )

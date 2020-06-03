@@ -66,12 +66,14 @@ class FileSystem extends React.Component{
                         </List>
                         <Divider />
                         <List component="nav" aria-label="secondary mailbox folders">
+                            {window.sessionStorage.getItem("admin")==1 &&
                             <ListItem button component="a" href="/dashboard/admin">
                                 <ListItemIcon>
                                     <PowerSettingsNewIcon />
                                 </ListItemIcon>
                                 <ListItemText primary="관리자 페이지"/>
                             </ListItem>
+                            }
                             <ListItem button>
                                 <ListItemIcon>
                                     <PowerSettingsNewIcon />

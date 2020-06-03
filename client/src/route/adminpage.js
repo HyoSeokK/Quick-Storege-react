@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
-import {Grid, Typography, Divider, Button, Dialog, DialogContent, DialogContentText, DialogActions, TextField, DialogTitle, Paper,LinearProgress} from '@material-ui/core';
+import {Grid, Typography, Divider, Button, Dialog, DialogContent, DialogContentText, DialogActions, TextField, DialogTitle, Paper,LinearProgress, Modal, Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import 'fontsource-roboto';
 import Axios from 'axios';
 
+import GetAppIcon from '@material-ui/icons/GetApp';
+import ImageIcon from '@material-ui/icons/Image';
 
 
 export default class Adminpage extends Component{
@@ -16,14 +18,42 @@ export default class Adminpage extends Component{
         this.handleValue = this.handleValue.bind(this);
         this.insertUser = this.insertUser.bind(this);
         this.checkdata = this.checkdata.bind(this);
+        this.handleModalClose = this.handleModalClose.bind(this);
+        this.handleModalOpen = this.handleModalOpen.bind(this);
+        this.handleManageOpen = this.handleManageOpen.bind(this);
+        this.handleManageClose = this.handleManageClose.bind(this);
         this.state ={
             open : false,
             userid : '',
             userpass : '',
             check : '',
+            openModal : false,
+            manage : false
         };
     }
+    handleManageOpen(){
+        this.setState({
+            manage : true
+        })
+    }
+    handleManageClose(){
+        this.setState({
+            manage : false
+        })
+    }
 
+
+    handleModalClose(){
+        this.setState({
+            openModal : false
+        })
+    }
+    handleModalOpen(){
+        this.setState({
+            openModal : true
+        })
+    }
+    
     
     handleClickOpen = () =>{
         this.setState({
@@ -43,16 +73,17 @@ export default class Adminpage extends Component{
         this.setState(valchange);
     }
 
-    insertUser(){
+    async insertUser(){
         const url = '/api/insertuser';
-        Axios.post(url,{username : this.state.userid,pass:this.state.userpass}).then((response)=>{
+        await Axios.post(url,{username : this.state.userid,pass:this.state.userpass}).then((response)=>{
             this.setState({
                 check : response.data
             })
         })
         this.setState({
             userid : "",
-            userpass : ""
+            userpass : "",
+            openModal : true
         })
         this.handleClose();
     }
@@ -61,17 +92,25 @@ export default class Adminpage extends Component{
         const data = this.state.check
         if(data=="Succes"){
             return(
-                <Alert severity="success">
-                    <AlertTitle>Success</AlertTitle>
-                    정상적으로 유저를 생성했습니다! <strong>{user}</strong>
-                </Alert>
+                <Modal
+                    open={this.state.openModal}
+                    onClose={this.handleModalClose}>
+                    <Alert severity="success">
+                        <AlertTitle>Success</AlertTitle>
+                        정상적으로 유저를 생성했습니다! <strong>{user}</strong>
+                    </Alert>
+                </Modal>
             )
         }else if(data == "fail"){
             return(
-                <Alert severity="error">
-                    <AlertTitle>실패</AlertTitle>
-                    동일명을 가진 유저가 존재합니다 <strong>check it out!</strong>
-                </Alert>
+                <Modal
+                    open={this.state.openModal}
+                    onClose={this.handleModalClose}>
+                    <Alert severity="error">
+                        <AlertTitle>실패</AlertTitle>
+                        동일명을 가진 유저가 존재합니다 <strong>check it out!</strong>
+                    </Alert>
+                </Modal>
             )
         }else{
             return(
@@ -96,13 +135,15 @@ export default class Adminpage extends Component{
                         하단의 버튼을 누르고 유저의 아이디 비밀번호를 입력하면 해당하는 유저의 저장장소와함께 아이디가 생성됩니다.
                     </Typography>
                     <Button color='default' variant='contained' onClick={event => this.handleClickOpen()}>유저 생성</Button>
+                    <Button color='default' variant='contained' onClick={event => this.handleManageOpen()}>유저 관리</Button>
+                    <UserTable open={this.state.manage} close={this.handleManageClose}/>
                     {this.checkdata()}
                 </Paper>
                 <Dialog open={this.state.open} onClose={event =>this.handleClose} aria-labelledby="form-dialog-title">
                         <DialogTitle id="form-dialog-title">유저생성</DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
-                                    생성할 폴더의 이름을 입력 해주세요
+                                    유저를 생성하기위한 정보를 입력하세요!
                                 </DialogContentText>
                                 <TextField type="text" label="UserName" name="userid" value={this.state.userid} onChange={this.handleValue} /><br/>
                                 <TextField type='password' label="Userpass" name="userpass" value={this.state.userpass} onChange={this.handleValue} />
@@ -116,10 +157,8 @@ export default class Adminpage extends Component{
                             </Button>
                             </DialogActions>
                 </Dialog>
-
-
                 <Divider variant="fullWidth" style={{marginTop:"30px",marginBottom:"30px"}}></Divider>
-                <Paper style={{padding:"20px"}}>
+                <Paper style={{padding:"20px" ,margin:"20px"}}>
                     <Typography variant="h4" component="h2">
                         <b>시스템 자원</b>
                     </Typography>
@@ -128,12 +167,103 @@ export default class Adminpage extends Component{
                         시스템 자원사용량 표시
                     </Typography>
                     <CPUMemUsage />
-
                 </Paper>
             </Grid>
         )
     }
 }
+class UserTable extends React.Component{
+    constructor(props){
+        super(props);
+        this.renderlist = this.renderlist.bind(this);
+        this.deleteaction = this.deleteaction.bind(this);
+        this.state={
+            userlist : null
+        };
+    }
+
+    async datareturn(){
+        let url = '/api/listuser'
+        return Axios.post(url,{username:""})
+    }
+
+    async componentDidMount(){
+        console.log("data 유저리스트 봤는데");
+        const data = await this.datareturn();
+        console.log(data.data);
+        this.setState({userlist:data.data})
+    }
+
+    async deleteaction(name){
+        let url = '/api/delete/'
+        Axios.delete(url,{username : name});
+        const data = await this.datareturn();
+        this.setState({userlist:data.data})
+    }
+    renderlist(){
+        if(!this.state.userlist){
+            return(
+                <div></div>
+            )
+        }else{
+            return this.state.userlist.map((user)=>{
+                return(
+                <TableRow>
+                    <TableCell>
+                        {user.username}
+                    </TableCell>
+                    <TableCell>
+                        {user.size}
+                    </TableCell>
+                    <TableCell>
+                         <IconButton aria-label="Delete" onClick={()=>this.deleteaction(user.username)}>
+                                 <DeleteIcon></DeleteIcon>
+                         </IconButton>
+                    </TableCell>
+                </TableRow>
+                )
+            })
+        }
+        
+    }
+
+    render(){
+        return(
+            <Dialog open={this.props.open} onClose={event =>this.props.close()} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth = {'md'}>
+                        <DialogTitle id="form-dialog-title">유저관리</DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    유저 관리 페이징입니다.
+                                </DialogContentText>
+                                <Table stickyHeader size="small" style={{maxHeight:500,overflowX:"hidden",overflowY:"auto"}}>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>
+                                                유저이름
+                                            </TableCell>
+                                            <TableCell>
+                                                사용량
+                                            </TableCell>
+                                            <TableCell>
+                                                부가설정
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {this.renderlist()}
+                                    </TableBody>
+                                </Table>
+                            </DialogContent>
+                            <DialogActions>
+                            <Button onClick={event =>this.props.close()} color="primary">
+                                닫기
+                            </Button>
+                        </DialogActions>
+            </Dialog>
+        )
+    }
+}
+
 
 class CPUMemUsage extends React.Component{
     constructor(props){

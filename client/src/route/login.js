@@ -85,11 +85,12 @@ class Login extends React.Component{
     submitHandle(e){
         e.preventDefault();
         this.checkLogin().then((response) =>{
-            if(response.data == "ok"){
+            if(response.data.data == "ok"){
                 console.log("재접근 확인중");
                 this.setState({servermgs : "로그인을 정상적으로 하셨습니다"});
                 this.setState({logck : 0});
                 window.sessionStorage.setItem('user', this.state.userid);
+                window.sessionStorage.setItem('admin', response.data.admin);
                 // this.getFFileList(window.sessionStorage.getItem('user'));
                 const user = window.sessionStorage.getItem('user');
                 this.props.PathAction.setPath(user);
