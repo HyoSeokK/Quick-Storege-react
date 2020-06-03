@@ -65,7 +65,9 @@ class App extends Component {
         <div className="root">
           <Head loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>
           <Router>
-            {window.sessionStorage.getItem('user') ? <Redirect to="/dashboard"/> : <Redirect to="/login"/>}
+            {window.sessionStorage.getItem('user') ? 
+            <Redirect to="/dashboard"/> 
+            : <Redirect to="/login"/>}
             <Route path="/login" component={() => <Login logcheck={this.state.logcheck} loginuser={this.state.loginuser} changeUser={this.changeUser} />} />
             <Route path="/dashboard" component={() => <DashBoard loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>}/>
           </Router>

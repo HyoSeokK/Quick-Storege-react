@@ -9,13 +9,17 @@ import DraftsIcon from '@material-ui/icons/Drafts';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import ShareIcon from '@material-ui/icons/Share';
 import ComputerIcon from '@material-ui/icons/Computer';
-import FileList from '../containers/fileList';
-import FileDetail from '../containers/fileDetail';
+
 import './css/dashBoard.css';
 import { bindActionCreators,compose } from 'redux';
 import {connect} from 'react-redux';
-import * as pathAction from '../reducers/pathSet'
-import * as selfile from '../reducers/selectFile'
+import * as pathAction from '../reducers/pathSet';
+import * as selfile from '../reducers/selectFile';
+
+import CloudService from './cloudService';
+import Adminpage from './adminpage'
+import {BrowserRouter as Router, Route} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 
 class FileSystem extends React.Component{
     constructor(props){
@@ -47,7 +51,7 @@ class FileSystem extends React.Component{
                 <Grid container spacing={1}>
                     <Grid item xs>
                         <List component="nav" aria-label="main mailbox folders">
-                            <ListItem button>
+                            <ListItem button component="a" href="/dashboard/">
                             <ListItemIcon>
                                 <InboxIcon />
                             </ListItemIcon>
@@ -62,6 +66,12 @@ class FileSystem extends React.Component{
                         </List>
                         <Divider />
                         <List component="nav" aria-label="secondary mailbox folders">
+                            <ListItem button component="a" href="/dashboard/admin">
+                                <ListItemIcon>
+                                    <PowerSettingsNewIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="관리자 페이지"/>
+                            </ListItem>
                             <ListItem button>
                                 <ListItemIcon>
                                     <PowerSettingsNewIcon />
@@ -70,13 +80,11 @@ class FileSystem extends React.Component{
                             </ListItem>
                         </List>
                     </Grid>
-                    <Grid item xs={8}>
-                        {/* 여기가 리스트 들어갈곳! */}
-                        <FileList/>
-                    </Grid>
-                    <Grid item xs={2}>
-                        {/* 여기는 파일 상세정보 */}
-                        <FileDetail />
+                    <Grid item xs={10}>
+                        <Router>
+                            <Route exact path="/dashboard/" component={()=> <CloudService />}/>
+                            <Route exact path="/dashboard/admin" component={()=><Adminpage />}/>
+                        </Router>
                     </Grid>
                 </Grid>
             </div>
@@ -85,8 +93,10 @@ class FileSystem extends React.Component{
 
 }
 
+
 export default connect(null,(dispatch)=>({
     PathAction : bindActionCreators(pathAction,dispatch),
     SelFile : bindActionCreators(selfile,dispatch)
     })
 )(FileSystem);
+

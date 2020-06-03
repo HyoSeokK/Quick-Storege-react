@@ -53,6 +53,7 @@ class FileListDetail extends Component{
         this.filedownload = this.filedownload.bind(this);
         this.filedelete = this.filedelete.bind(this);
         this.iconselect = this.iconselect.bind(this);
+        this.foderdelete = this.foderdelete.bind(this);
         this.state = {
             path : this.props.path,
             fileList : this.props.fileList
@@ -85,15 +86,8 @@ class FileListDetail extends Component{
     // componentDidMount는 초기에 컴포넌트가 마운트 될때 한번 실행됩니다.
     // 초기 실행시 기준은 회원의 ID 값이 되며 ID값을 통한 접근으로 파일목록을 출력합니다.
     componentDidMount(){
-         console.log("리셋됨?");
-         console.log(window.sessionStorage.getItem('user'));
-         console.log(this.props.path);
         const ckpath = this.props.path.split('/');
         const ckuser = window.sessionStorage.getItem('user')
-        console.log("상위폴더 체킹을 위한 데이터 확인--listdetail 59line");
-        console.log(ckpath.length);
-        console.log(ckpath);
-        
         if(ckuser || ckpath[0] !== "" ){
             console.log(this.state.path); 
             this.getFFileList(this.state.path);
@@ -216,6 +210,24 @@ class FileListDetail extends Component{
 
     }
 
+    async foderdelete(fordername){
+        let check = Axios.post(`/rmfoder/${fordername}`,{path:this.props.path},{responseType:"text"})
+        console.log("폴더 삭제접근2");
+        await this.getFFileList(this.props.path);
+        this.props.SelectFile.notFile();
+    }
+
+
+    deleteaction(file){
+        if(file.isFile){
+            console.log("파일 삭제접근");
+            this.filedelete(file.name)
+        }else{
+            console.log("폴더 삭제접근");
+            this.foderdelete(file.name);
+        }
+    }
+
     // 이름 ; iconselect()
     // 역할 : List의 보여질 아이콘 정하기
     // 작동원리 : file안에 들어있는 extention(확장자)를 통한 분석 후 맞는 아이콘 리턴
@@ -284,10 +296,10 @@ class FileListDetail extends Component{
                          {file.date}
                     </TableCell>
                     <TableCell>
-                     <IconButton aria-label="download" onClick={()=>this.filedownload(file.name)}>
+                     <IconButton aria-label="download" onClick={()=>this.deleteaction(file)}>
                          <GetAppIcon ></GetAppIcon>
                      </IconButton>
-                        <IconButton aria-label="Delete" onClick={()=>this.filedelete(file.name)}>
+                        <IconButton aria-label="Delete" onClick={()=>this.deleteaction(file)}>
                         <DeleteIcon></DeleteIcon>
                      </IconButton>
                      </TableCell>

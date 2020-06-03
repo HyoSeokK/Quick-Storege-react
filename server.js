@@ -29,6 +29,7 @@ const dbdata = fs.readFileSync('./database.json');
 const db = JSON.parse(dbdata);
 const mariadb = require('mysql');
 const path = require('path');
+const OS = require('os');
 
 // DB 커넥션 부분
 //MariaDB와 MySql은 같이 사용이 가능하다는 것 기억하기
@@ -41,7 +42,58 @@ const connection = mariadb.createConnection({
     database:db.database
 });
 connection.connect();
-//
+// 폴더 삭제 모듈
+var deleteFolderRecursive = function(path) {
+    console.log("1");
+    
+    if (fs.existsSync(path)) {
+        console.log("2");
+      fs.readdirSync(path).forEach(function(file, index){
+        var curPath = path + "/" + file;
+        console.log("3");
+        if (fs.lstatSync(curPath).isDirectory()) { // recurse
+            console.log("4");
+          deleteFolderRecursive(curPath);
+          console.log("5");
+        } else { // delete file
+          fs.unlinkSync(curPath);
+          console.log("6");
+        }
+      });
+      fs.rmdirSync(path);
+      console.log("7");
+    }
+  };
+
+  var oldCPUTime = 0
+  var oldCPUIdle = 0
+    function getLoad(){
+      var cpus = OS.cpus()
+      var totalTime = -oldCPUTime
+      var totalIdle = -oldCPUIdle
+      for(var i = 0; i < cpus.length; i++) {
+          var cpu = cpus[i]
+          for(var type in cpu.times) {
+              totalTime += cpu.times[type];
+              if(type == "idle"){
+                  totalIdle += cpu.times[type];
+              }
+          }
+      }
+  
+      var CPUload = 100 - Math.round(totalIdle/totalTime*100)
+      oldCPUTime = totalTime
+      oldCPUIdle = totalIdle
+  
+      return {
+          CPU:CPUload,
+          mem:100 - Math.round(OS.freemem()/OS.totalmem()*100)
+      }       
+  }
+  // cpu데이터 사용량 전달
+  app.get('/usagedata/',(req,res)=>{
+    res.send(getLoad());
+  })
 
 
 
@@ -88,17 +140,41 @@ app.post('/upload/:filename', upload.single('file'), (req, res) => {
     res.status(200).send();
 });
 
+//다운로드
+//실제 저장 경로 위치에 있는 파일을 전송 시켜줌
+// 브라우저에서는 기본 다운로드로 진행
 app.post('/download/:filename',(req,res)=>{
     let file = `./upload${req.body.path}/${req.params.filename}`;
     console.log("전송 요청은 들어옴"+file);
     res.download(file);
 })
+
+// 파일 단일 삭제
 app.post('/delete/:filename',(req,res)=>{
     let file = `./upload${req.body.path}/${req.params.filename}`;
     fs.unlinkSync(file)
     res.send('ok');
-    
 })
+
+// 폴더삭제
+// 폴더 안해있는 내부 모든 파일시스템 구조 싹다 삭제함
+app.post('/rmfoder/:fordername',(req,res)=>{
+    let forder = `./upload${req.body.path}/${req.params.fordername}/`;
+    deleteFolderRecursive(forder);
+    res.send('ok');
+})
+
+
+
+//폴더 생성
+//현재 파일 위치에 대한 경로를 받고 폴더명을 받으면 해댱 경로 폴더생성
+app.post('/createforder/',(req,res)=>{
+    let filepath = './upload'+ req.body.path+"/" + req.body.fordername;
+    fst.mkdirsSync(filepath);
+    res.send('1');
+})
+
+
 
 
 
@@ -191,6 +267,28 @@ app.post('/api/login',(req,res)=>{
     }
     })
 })
+// /api/insertuser/ 역할 : 프론트엔드에서 접근시에 로그인 판별해줌
+// req.body <= 실질적인 데이턱값을 가지고있는 부분
+// req.body 안에 매핑해서 보낸 키값을 연결해서 호출하면 데이터 불러올수있음
+// 
+app.post('/api/insertuser',(req,res)=>{
+    let sql = 'INSERT INTO userspace (username,pass) VALUES (?,?);'
+    let username = req.body.username;
+    let pass = req.body.pass;
+    let param = [username,pass]
+    connection.query(sql,param,(err, rows, fields)=>{
+        if(err){
+            console.log(err);
+            res.send("fail")
+        }else{
+            console.log("성공");
+            fst.mkdirsSync('./upload/'+username);
+            res.send("Succes")
+        }
+        
+    })
+})
+
 
 
 
