@@ -25,11 +25,11 @@ __database.json__
 </code>
 </pre>
 <hr/>
-##버전 정보
-Nodejs : 14.3.0(안정버전에서도 동작가능)   
-DataBase : MariaDB 10.3   
-React : ^16.13.1   
-redux : ^4.0.5   
+##버전 정보   
+* Nodejs : 14.3.0(안정버전에서도 동작가능)   
+* DataBase : MariaDB 10.3   
+* React : ^16.13.1   
+* redux : ^4.0.5   
 
 
 
