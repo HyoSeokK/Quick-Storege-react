@@ -1,5 +1,7 @@
 # Quick-Storege-react
+=================
 #Test this
+------------
 ##초기설정
   1. 현재 디렉토리에서 npm install
   2. upload 폴더 생성
@@ -9,21 +11,25 @@
   6. npm run dev
 
 ##DB 설정
-아래의 json 파일생성후 아래내용 기입
-database.json
-{
-	"host" : "주소",
-	"user" : "유저명",
-	"password" : "유저비밀번호",
-	"port" : "포트번호",
-	"database" : "DB명"
-}
-
+아래의 json 파일생성후 아래내용 기입   
+__database.json__
+<pre>
+<code>
+{   
+	"host" : "주소",   
+	"user" : "유저명",   
+	"password" : "유저비밀번호",   
+	"port" : "포트번호",   
+	"database" : "DB명"   
+}   
+</code>
+</pre>
+<hr/>
 ##버전 정보
-Nodejs : 14.3.0(안정버전에서도 동작가능)
-DataBase : MariaDB 10.3
-React : ^16.13.1
-redux : ^4.0.5
+Nodejs : 14.3.0(안정버전에서도 동작가능)   
+DataBase : MariaDB 10.3   
+React : ^16.13.1   
+redux : ^4.0.5   
 
 
 
