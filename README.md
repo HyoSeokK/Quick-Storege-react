@@ -1,6 +1,5 @@
 # Quick-Storege-react
-=================
-#Test this
+Test this
 ------------
 ##초기설정
   1. 현재 디렉토리에서 npm install
@@ -26,10 +25,10 @@ __database.json__
 </pre>
 <hr/>
 ##버전 정보   
-* Nodejs : 14.3.0(안정버전에서도 동작가능)   
-* DataBase : MariaDB 10.3   
-* React : ^16.13.1   
-* redux : ^4.0.5   
+* Nodejs : 14.3.0(안정버전에서도 동작가능)<br/>
+* DataBase : MariaDB 10.3   <br/>
+* React : ^16.13.1   <br/>
+* redux : ^4.0.5   <br/>
 
 
 
