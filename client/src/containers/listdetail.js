@@ -271,7 +271,7 @@ class FileListDetail extends Component{
         // onClick={()=>this.filedownload(file.name)}
         const {classes} = this.props;
         
-        if(!this.props.fileList ||this.props.fileList[0].date =="notfound"){
+        if(this.props.fileList == null ||this.props.fileList[0].date =="notfound"){
             return(
                 <div></div>
         )
@@ -297,7 +297,7 @@ class FileListDetail extends Component{
                          {file.date}
                     </TableCell>
                     <TableCell>
-                     <IconButton aria-label="download" onClick={()=>this.deleteaction(file)}>
+                     <IconButton aria-label="download" onClick={()=>this.filedownload(file.name)}>
                          <GetAppIcon ></GetAppIcon>
                      </IconButton>
                         <IconButton aria-label="Delete" onClick={()=>this.deleteaction(file)}>

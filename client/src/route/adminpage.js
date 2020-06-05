@@ -1,18 +1,17 @@
 import React, {Component} from 'react';
-import {Grid, Typography, Divider, Button, Dialog, DialogContent, DialogContentText, DialogActions, TextField, DialogTitle, Paper,LinearProgress, Modal, Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core';
+import {Grid, Typography, Divider, Button, Dialog, DialogContent, DialogContentText, DialogActions, TextField, DialogTitle, Paper,LinearProgress, Modal, Table, TableHead, TableBody, TableRow, TableCell, IconButton} from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import 'fontsource-roboto';
 import Axios from 'axios';
-
+import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import ImageIcon from '@material-ui/icons/Image';
+import SearchIcon from '@material-ui/icons/Search';
 
 
 export default class Adminpage extends Component{
-
     constructor(props){
         super(props);
-        
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleValue = this.handleValue.bind(this);
@@ -22,15 +21,24 @@ export default class Adminpage extends Component{
         this.handleModalOpen = this.handleModalOpen.bind(this);
         this.handleManageOpen = this.handleManageOpen.bind(this);
         this.handleManageClose = this.handleManageClose.bind(this);
+        this.handleInsert = this.handleInsert.bind(this);
         this.state ={
             open : false,
             userid : '',
             userpass : '',
             check : '',
             openModal : false,
-            manage : false
+            manage : false,
+            inserting : 0
         };
     }
+    handleInsert(){
+        this.setState({
+            inserting : 0
+        })
+    }
+
+
     handleManageOpen(){
         this.setState({
             manage : true
@@ -83,7 +91,8 @@ export default class Adminpage extends Component{
         this.setState({
             userid : "",
             userpass : "",
-            openModal : true
+            openModal : true,
+            inserting : 1
         })
         this.handleClose();
     }
@@ -136,7 +145,7 @@ export default class Adminpage extends Component{
                     </Typography>
                     <Button color='default' variant='contained' onClick={event => this.handleClickOpen()}>유저 생성</Button>
                     <Button color='default' variant='contained' onClick={event => this.handleManageOpen()}>유저 관리</Button>
-                    <UserTable open={this.state.manage} close={this.handleManageClose}/>
+                    <UserTable open={this.state.manage} close={this.handleManageClose} insert={this.state.inserting} initinsert={this.handleInsert}/>
                     {this.checkdata()}
                 </Paper>
                 <Dialog open={this.state.open} onClose={event =>this.handleClose} aria-labelledby="form-dialog-title">
@@ -172,68 +181,142 @@ export default class Adminpage extends Component{
         )
     }
 }
+
+
+
 class UserTable extends React.Component{
     constructor(props){
         super(props);
         this.renderlist = this.renderlist.bind(this);
         this.deleteaction = this.deleteaction.bind(this);
+        this.searchaction = this.searchaction.bind(this);
         this.state={
-            userlist : null
+            userlist : '',
+            search : '',
         };
     }
-
     async datareturn(){
-        let url = '/api/listuser'
-        return Axios.post(url,{username:""})
+        let url = '/api/listuser/'
+        let data = await Axios.get(url)
+        this.setState({userlist:data.data})
     }
 
     async componentDidMount(){
         console.log("data 유저리스트 봤는데");
-        const data = await this.datareturn();
-        console.log(data.data);
-        this.setState({userlist:data.data})
+        await this.datareturn()
     }
 
     async deleteaction(name){
-        let url = '/api/delete/'
-        Axios.delete(url,{username : name});
-        const data = await this.datareturn();
-        this.setState({userlist:data.data})
+        let url = `/api/delete/${name}`
+        await Axios.delete(url);
+        let array = this.state.userlist;
+        for(let i = 0 ; i < array.length ; i++){
+            if(name == array[i].username){
+                array.splice(i,1);
+                break;
+            }
+        }
+        this.setState({userlist:array,search:''})
     }
-    renderlist(){
-        if(!this.state.userlist){
-            return(
-                <div></div>
-            )
-        }else{
-            return this.state.userlist.map((user)=>{
-                return(
-                <TableRow>
-                    <TableCell>
-                        {user.username}
-                    </TableCell>
-                    <TableCell>
-                        {user.size}
-                    </TableCell>
-                    <TableCell>
-                         <IconButton aria-label="Delete" onClick={()=>this.deleteaction(user.username)}>
-                                 <DeleteIcon></DeleteIcon>
-                         </IconButton>
-                    </TableCell>
-                </TableRow>
-                )
-            })
+
+
+    async componentDidUpdate(prevProps,prevState){
+        if(this.props.insert !== 0){
+                await this.datareturn();
+                this.props.initinsert();
         }
         
     }
 
+    renderlist(){
+        let i =0
+        let searchdata = new Array();
+        if(this.state.userlist == '' || this.state.userlist=="nodata"){
+            return(
+                <div>no user</div>
+            )
+        }else{
+            if(this.state.search != ''){
+                searchdata = [];
+                for(i=0 ; i< this.state.userlist.length; i++){
+                    if(this.state.userlist[i].username.indexOf(this.state.search) == 0){
+                        searchdata.push(this.state.userlist[i]);
+                        console.log(i);
+                        console.log(searchdata);
+                        console.log(this.state.userlist[i].username.indexOf(this.state.search));
+                        
+                    }
+                }
+                console.log("searchdata");
+                console.log(searchdata);
+            }
+            //
+            if(this.state.search != ''){
+                
+                if(searchdata == null){
+                    return(
+                        <div>
+                            No User
+                        </div>
+                    )
+                }
+                return searchdata.map((user)=>{
+                    let i = 0;
+                    return(
+                    <TableRow>
+                        <TableCell>
+                            {user.username}
+                        </TableCell>
+                        <TableCell>
+                            {user.size}
+                        </TableCell>
+                        <TableCell>
+                            <IconButton aria-label="Delete" onClick={()=>this.deleteaction(user.username)}>
+                                    <DeleteIcon></DeleteIcon>
+                            </IconButton>
+                        </TableCell>
+                    </TableRow>
+                    )
+                })
+            }else{
+                return this.state.userlist.map((user)=>{
+                    return(
+                    <TableRow>
+                        <TableCell>
+                            {user.username}
+                        </TableCell>
+                        <TableCell>
+                            {user.size}
+                        </TableCell>
+                        <TableCell>
+                            <IconButton aria-label="Delete" onClick={()=>this.deleteaction(user.username)}>
+                                    <DeleteIcon></DeleteIcon>
+                            </IconButton>
+                        </TableCell>
+                    </TableRow>
+                    )
+                })
+            }
+            //
+        }
+        
+    }
+    handleSearch(e){
+        const valchange = {};
+        valchange[e.target.name] = e.target.value;
+        this.setState(valchange);
+    }
+   
+
+    async searchaction(){
+    }
     render(){
         return(
             <Dialog open={this.props.open} onClose={event =>this.props.close()} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth = {'md'}>
                         <DialogTitle id="form-dialog-title">유저관리</DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
-                                    유저 관리 페이징입니다.
+                                    유저 검색 <TextField type="text" name="search" value={this.state.search} onChange={event => this.handleSearch(event)}></TextField>
                                 </DialogContentText>
                                 <Table stickyHeader size="small" style={{maxHeight:500,overflowX:"hidden",overflowY:"auto"}}>
                                     <TableHead>

@@ -19,7 +19,9 @@ app.use(bodyparser.json());
 // ps.) 추후에 데이터 에디터용으로 만들수 있음
 // ps.) write를 통해 텍스트 데이터 받아와 처리 하기
 const fs = require('fs');
-
+//폴더 사이즈 구하기위한 툴
+//
+const getSize = require('get-folder-size');
 
 //database 설정값 가져오기
 const dbdata = fs.readFileSync('./database.json');
@@ -291,67 +293,75 @@ app.post('/api/insertuser',(req,res)=>{
 })
 
 
-app.post('/api/listuser',(req,res)=>{
-    let listdata = new Array();
-    
-    if(req.body.username == ""){
+app.get('/api/listuser/',(req,res)=>{
+    res.setTimeout(12000,()=>{
+        console.log('request has time out');
+        res.send(408);
+    })
+        let listdata = new Array();
+        console.log("여기 검색함");
         let sql = 'select * from userspace';
         connection.query(sql,(err,rows,fileds)=>{
-            console.log(rows.length);
-            let i = 1;
+            let i = 0;
             let count = rows.length;
             if(err){
-                console.log("에러터짐1");
                 console.log(err);
                 res.send(err);
             }
             rows.forEach(p => {
                 var data = new Object()
-                fs.stat('./upload/'+ p.username,(err,stats)=>{
-                    data.username = p.username;
-                    data.size = stats.size;
-                    listdata.push(data);
-                    
-                    if(i==count){
-                        res.send(listdata);
-                        console.log(listdata);
+                var fordersize = 0
+                getSize('./upload/'+p.username,(err,size)=>{
+                    if(size < 1024*1024){
+                        fordersize = (size / 1024).toFixed(2) + "KB";
+                    }else if(size < 1024*1024*1024){
+                        fordersize = (size / 1024 / 1024).toFixed(2) + "MB";
+                    }else if(size < 1024*1024*1024){
+                        fordersize = (size / 1024 / 1024).toFixed(2) + "GB";
                     }
-                    i= i+1;
+                    data.username = p.username
+                    data.size = fordersize
+                    if(p.admin == 0){
+                        listdata.push(data);
+                    }else{
+                         count = count - 1;
+                    }
+                    if(i==count){
+                        console.log(listdata);
+                        res.send(listdata);
+                     }
+                     i= i+1;
                 })
+                
+                // fs.stat('./upload/'+ p.username,(err,stats)=>{
+                //     data.username = p.username;
+                //     data.size = stats.size;
+                //     if(p.admin == 0){
+                //         listdata.push(data);
+                //     }else{
+                //         count = count - 1;
+                //     }
+                //     if(i==count){
+                //         console.log(listdata);
+                //         res.send(listdata);
+                //     }
+                //     i= i+1;
+                // })
             })
             
-            
         })
-    }else{
-        let sql = `select username from userspace where username LIKE '${req.body.username}%'`
-        connection.query(sql,(err,rows,fileds)=>{
-            if(err){
-                console.log("에러터짐2");
-                console.log(err);
-                res.send(err);
-            }
-            
-            rows.forEach(p => {
-                var data = new Object()
-                fs.stat('./upload/'+ p.username,(err,stats)=>{
-                    data.username = p.username;
-                    data.size = stats.size;
-                    listdata.push(data);
-                })
-                console.log(listdata);
-                res.send(listdata)
-            })
-            
-        })
-    }
+    
 })
 
-app.delete('/api/delete/',(req,res)=>{
-    let sql =  `DELETE FROM 'quick'.'userspace' WHERE  'username'=?`
-    let name = req.body.username;
-    let params = [name]
-    connection.query(sql,params,(err,rows,fileds)=>{})
+app.delete('/api/delete/:username',(req,res)=>{
+    let name = req.params.username;
+    let sql =  `DELETE FROM userspace WHERE username='${name}'`
+    console.log(sql);
+    connection.query(sql,(err,fileds)=>{
+        if(err) console.log(err);
+    })
     deleteFolderRecursive('./upload/'+name)
+    res.send(202);
 })
 
 
