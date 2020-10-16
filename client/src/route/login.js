@@ -4,11 +4,12 @@ import TextField from '@material-ui/core/TextField';
 import { withStyles,Paper,CircularProgress,Button,Container, Grid } from '@material-ui/core';
 import Axios from 'axios';
 import './css/login.css';
-import Route, { Redirect } from 'react-router-dom';
+import Route, { Redirect , useHistory} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators, compose} from 'redux';
 import * as fileListAction from '../reducers/fileList'
 import * as pathAction from '../reducers/pathSet'
+
 
 const styles = theme =>({
     progress: {
@@ -16,6 +17,7 @@ const styles = theme =>({
     },
     btn : {
         marginTop: 20
+
     },
     box :{
         alignItems: 'center',
@@ -39,6 +41,7 @@ class Login extends React.Component{
         this.handleValue = this.handleValue.bind(this);
         this.submitHandle = this.submitHandle.bind(this);
         this.checkLogin = this.checkLogin.bind(this);
+        this.redirectDashBoard = this.redirectDashBoard.bind(this);
         // this.getFFileList = this.getFFileList.bind(this);
     }
 
@@ -63,8 +66,8 @@ class Login extends React.Component{
     // 이름 : Progress
     // 역할 : 로그인 버튼 누름과 동시에 서버와 통신중 대기 상황일때 로딩바
     progress = () =>{
-    const {comple} = this.state
-    this.setState({comple:comple>=100 ? 0 : comple + 1});
+        const {comple} = this.state
+        this.setState({comple:comple>=100 ? 0 : comple + 1});
     }
 
     //이름 : handleValue
@@ -82,6 +85,7 @@ class Login extends React.Component{
     // 이때 일반적인 submit처리가 아닌 나만의 로그인 처리를 가능하도록
     // 설정하였음
     //2020 05 05 변경사항) 초기 path == 유저아이디 저장을 위한 리덕스 엑션을 추가함
+    //
     submitHandle(e){
         e.preventDefault();
         this.checkLogin().then((response) =>{
@@ -100,18 +104,18 @@ class Login extends React.Component{
                 this.setState({logck : 1})
             }
             this.setState({check:0});
+
         });
     }
+    redirectDashBoard(){
+        if(this.props.loginuser){
+            return(
+                <Redirect to="/dashboard"/>
+            )
+        }
+    }
 
-    // async getFFileList(path){
-    //     try{
-    //         console.log("접근성공");
-    //         await this.props.FileListAction.getFileList(path);
-    //     }catch(e){
-    //         console.log("에러발생");
-    //         throw(e)
-    //     }
-    // }
+
 
 
     //이름 : checkLogin
@@ -126,10 +130,12 @@ class Login extends React.Component{
         return Axios.post(url,{ username:this.state.userid, pass:this.state.pass});
     }
 
+    
     render(){
         const { classes } = this.props;
         return(
             <div className="loginmain">
+                {this.props.loginuser && <Redirect to="/dashboard/"/>}
                 <Grid className={classes.root} alignItems="center" direction="column" container spacing={3}>
                     <Grid item>
                     <Paper  style={{width:400, height:500, background:"#D8D8D8"}}>
@@ -138,6 +144,7 @@ class Login extends React.Component{
                             <h1>로그인</h1>
                             <TextField id="outlined-basic" label="UserName" varient="outlined" name="userid" onChange={this.handleValue}></TextField><br/>
                             <TextField type="password" id="outlined-basic" label="PassWord" varient="outlined" name="pass" value={this.state.pass} onChange={this.handleValue}></TextField><br/>
+                            
                                 {this.state.check ?   <CircularProgress  variant="determinate" value={this.state.comple}></CircularProgress> :
                                     <Button  className={classes.btn} type="submit" color="primary" variant="contained">로그인</Button>
                                 }

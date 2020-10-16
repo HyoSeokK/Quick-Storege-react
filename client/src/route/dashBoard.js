@@ -9,6 +9,7 @@ import DraftsIcon from '@material-ui/icons/Drafts';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import ShareIcon from '@material-ui/icons/Share';
 import ComputerIcon from '@material-ui/icons/Computer';
+import PersonIcon from '@material-ui/icons/Person';
 
 import './css/dashBoard.css';
 import { bindActionCreators,compose } from 'redux';
@@ -18,7 +19,8 @@ import * as selfile from '../reducers/selectFile';
 
 import CloudService from './cloudService';
 import Adminpage from './adminpage'
-import {BrowserRouter as Router, Route} from 'react-router-dom';
+import ShareUser from './sharepage'
+import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
 import {Redirect} from 'react-router-dom';
 
 class FileSystem extends React.Component{
@@ -48,16 +50,17 @@ class FileSystem extends React.Component{
         console.log(this.state.loginuser);
         return(
             <div className='dashBoard'>
+                {!window.sessionStorage.getItem('user') && <Redirect to="/login"/>}
                 <Grid container spacing={1}>
                     <Grid item xs>
                         <List component="nav" aria-label="main mailbox folders">
-                            <ListItem button component="a" href="/dashboard/">
+                            <ListItem button component={Link} to="/dashboard/">
                             <ListItemIcon>
                                 <InboxIcon />
                             </ListItemIcon>
                             <ListItemText primary="내 파일" />
                             </ListItem>
-                            <ListItem button>
+                            <ListItem button component={Link} to="/dashboard/shareuser">
                                 <ListItemIcon>
                                     <ShareIcon />
                                 </ListItemIcon>
@@ -67,9 +70,9 @@ class FileSystem extends React.Component{
                         <Divider />
                         <List component="nav" aria-label="secondary mailbox folders">
                             {window.sessionStorage.getItem("admin")==1 &&
-                            <ListItem button component="a" href="/dashboard/admin">
+                            <ListItem button component={Link} to="/dashboard/admin">
                                 <ListItemIcon>
-                                    <PowerSettingsNewIcon />
+                                    <PersonIcon />
                                 </ListItemIcon>
                                 <ListItemText primary="관리자 페이지"/>
                             </ListItem>
@@ -84,8 +87,13 @@ class FileSystem extends React.Component{
                     </Grid>
                     <Grid item xs={10}>
                         <Router>
-                            <Route exact path="/dashboard/" component={()=> <CloudService />}/>
-                            <Route exact path="/dashboard/admin" component={()=><Adminpage />}/>
+                            <Switch>
+                                <Route exact path="/" component={()=> <CloudService />}/>
+                                <Route exact path="/dashboard" component={()=> <CloudService />}/>
+                                <Route exact path="/dashboard/" component={()=> <CloudService />}/>
+                                <Route exact path="/dashboard/shareuser" component={()=><ShareUser/>}/>
+                                <Route exact path="/dashboard/admin" component={()=><Adminpage />}/>
+                            </Switch>
                         </Router>
                     </Grid>
                 </Grid>

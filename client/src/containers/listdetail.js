@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Axios from 'axios';
 
 //마테리얼 UI 디자인 관련
-import { Breadcrumbs, Link, TableBody, TableRow,TableCell,Checkbox, withStyles, Button} from '@material-ui/core';
+import { Breadcrumbs, Link, TableBody, TableRow,TableCell,Checkbox, withStyles, Button, Dialog, DialogActions, DialogTitle} from '@material-ui/core';
 import { sizing } from '@material-ui/system';
 //
 
@@ -19,6 +19,7 @@ import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import PublicIcon from '@material-ui/icons/Public';
 import ext from '../module/extension';
+import ShareIcon from '@material-ui/icons/Share';
 //
 
 //리덕스 연결
@@ -28,6 +29,7 @@ import {connect} from 'react-redux';
 import * as fileListAction from '../reducers/fileList'
 import * as pathAction from '../reducers/pathSet'
 import * as selectFile from '../reducers/selectFile'
+import InShare from './shareUser'
 //
 import './css/fileList.css'
 
@@ -54,9 +56,14 @@ class FileListDetail extends Component{
         this.filedelete = this.filedelete.bind(this);
         this.iconselect = this.iconselect.bind(this);
         this.foderdelete = this.foderdelete.bind(this);
+        this.sharedialopen = this.sharedialopen.bind(this);
+        this.sharedialoff = this.sharedialoff.bind(this);
+        this.shardialpage = this.shardialpage.bind(this);
         this.state = {
             path : this.props.path,
-            fileList : this.props.fileList
+            fileList : this.props.fileList,
+            selectfile : "",
+            shareOn : false
         }
 
     }
@@ -135,6 +142,7 @@ class FileListDetail extends Component{
     async removePath(){
         let repath = "";
         let data = this.props.path.split('/');
+        
         let length = data.length;
         for(let i = 1 ; i < length-1; i++){
             repath = repath + "/" + data[i];
@@ -144,6 +152,7 @@ class FileListDetail extends Component{
         if(this.state.path!==this.props.path){
             this.setState({path:this.props.path});
         }
+        console.log(length);
     }
 
     ////////////////////////////////////////////////////////
@@ -161,7 +170,9 @@ class FileListDetail extends Component{
                     <TableCell align={"justify"} size="small">
                     </TableCell>
                     <TableCell>
+                        {this.props.loading?<div></div> : 
                         <Link underline='none' color='inherit' onClick={() => this.removePath()} className={classes.link}>상위폴더</Link>
+                        }
                          {/* 이곳에 이벤트를 넣어서 처리를 폴더이동및 파일 전송 을 시작한다 */}
                     </TableCell>
                     <TableCell>
@@ -228,12 +239,50 @@ class FileListDetail extends Component{
             this.foderdelete(file.name);
         }
     }
+    // 하단 3가지의 함수는 쉐어 다이얼로그 페이지를 건드리는 부분입니다.
+    async sharedialopen(filename){
+        console.warn("1");
+        console.warn(filename);
+        await this.setState({
+            selectfile : filename,
+            shareOn : true
+        })
+        console.warn("여기가 선택된 파일명");
+        console.warn(this.state.selectfile);
+    }
+
+    async sharedialoff(){
+        await this.setState({
+            selectfile : "",
+            shareOn: false
+        })
+        console.warn(this.state.selectfile);
+    }
+    shardialpage(){
+        if(this.state.selectfile == ""){
+
+        }else{
+            return (
+                <InShare open={this.state.shareOn} close={event => this.sharedialoff()} path={this.state.path} file={this.state.selectfile}></InShare>
+            )
+        }
+    }
+    ////////
+
+    shouldComponentUpdate(nextProps,nextState){
+        if(this.state.fileList != nextState.fileList || this.state.shareOn != nextState.shareOn != this.props.loading != nextProps.loading || this.state.selectfile != nextState.selectfile){
+            return true;
+        }
+
+    }
+
+
+
 
     // 이름 ; iconselect()
     // 역할 : List의 보여질 아이콘 정하기
     // 작동원리 : file안에 들어있는 extention(확장자)를 통한 분석 후 맞는 아이콘 리턴
     iconselect(fileext){
-        
         if(!fileext.isFile){
             return (
                 <FolderIcon style={{ fontSize: 20 }}/>
@@ -280,7 +329,7 @@ class FileListDetail extends Component{
             return(
                 <TableRow key={file.id} hover className="rowtable">
                     <TableCell align={"justify"} size="small">
-                        <Checkbox></Checkbox>
+                        
                     </TableCell>
                     <TableCell align={"justify"} size="small">
                         {/* {file.isFile ?  
@@ -303,10 +352,15 @@ class FileListDetail extends Component{
                         <IconButton aria-label="Delete" onClick={()=>this.deleteaction(file)}>
                         <DeleteIcon></DeleteIcon>
                      </IconButton>
+                     {file.isFile ? 
+                     <IconButton aria-label="share" onClick={event => this.sharedialopen(file.name)}>
+                        <ShareIcon></ShareIcon>
+                     </IconButton>
+                     :
+                    <div></div> 
+                    }
                      </TableCell>
                 </TableRow>
-
-                
             )
         })}
     }
@@ -319,10 +373,16 @@ class FileListDetail extends Component{
             <TableBody>
                 { (this.props.path.split('/')[1] == window.sessionStorage.getItem('user')&& this.props.path.split('/')[2]) && this.renderback()}
                 {this.props.loading ? <div>로딩중</div> : this.renderList()}
+                <InShare open={this.state.shareOn} close={event => this.sharedialoff()} path={this.state.path} file={this.state.selectfile}></InShare>
+                {/* {this.shardialpage()} */}
             </TableBody>
         )
     }
 }
+
+
+
+
 
 
 export default compose(withStyles(styles),connect(

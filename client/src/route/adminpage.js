@@ -12,6 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 export default class Adminpage extends Component{
     constructor(props){
         super(props);
+
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleValue = this.handleValue.bind(this);
