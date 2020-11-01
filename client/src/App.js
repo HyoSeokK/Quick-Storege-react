@@ -100,6 +100,7 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+    const props = this.props
     console.log(this.state.loginuser);
       return (
         <div className="root">
@@ -114,10 +115,9 @@ class App extends Component {
                : <Route exact path="/" component={() => <Login logcheck={this.state.logcheck} loginuser={this.state.loginuser} changeUser={this.changeUser} />}/>}
                {/* 여기 수정 해야됨 session이 있으면 로그인 페이지 접근 안되게 변경하기 */}
               <Route exact path="/login" component={() => <Login logcheck={this.state.logcheck} loginuser={this.state.loginuser} changeUser={this.changeUser} />} />
-
               <Route exact path="/dashboard" component={() => <DashBoard loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>}/>
               <Route exact path="/dashboard/*" component={() => <DashBoard loginuser={this.state.loginuser} logoutfunc={this.logoutfunc}/>}/>
-              <Route exact path="/Linkview/" component={()=><Linkview />}/>
+              <Route exact path="/Linkview/:id" component={Linkview}/>
             </Switch>
           </Router>
             : 

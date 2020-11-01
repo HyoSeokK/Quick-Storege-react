@@ -8,7 +8,7 @@ import * as selectFile from '../reducers/selectFile'
 
 
 //UI 관련
-import { Grid, Paper, withStyles, List, ListItem, Avatar, ListItemAvatar, ListItemText } from '@material-ui/core';
+import { Grid, Paper, withStyles, List, ListItem, Avatar, ListItemAvatar, ListItemText, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 import './css/fileDetail.css';
 import TitleIcon from '@material-ui/icons/Title';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
@@ -21,6 +21,13 @@ const styles = theme => ({
         margin : '50px',
         textAlign: "center",
     },
+    dialog : {
+        textAlign: "center"
+    },
+    centerMedia : {
+        display : "block",
+        margin : "0 auto"
+    }
 });
 
 
@@ -39,10 +46,16 @@ class FileDetail extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            file : this.props.file
+            file : this.props.file,
+            opne : false,
+            check : true
         }
         this.selfile= this.selfileimage.bind(this);
         this.selfilestat = this.selfilestat.bind(this);
+        this.daialClose = this.daialClose.bind(this);
+        this.dialOpen = this.dialOpen.bind(this);
+        this.player = this.player.bind(this);
+        
     }
 
 
@@ -61,7 +74,7 @@ class FileDetail extends React.Component{
     //React에 핵심 잦은 rerender 작업을 방지하기위해서
     // FileDetail에 변동이 있을때만 렌더링 작업을 하라고 지시함
     shouldComponentUpdate(newProps,newState){
-        if(this.props.file !== newProps.file){
+        if(this.props.file !== newProps.file || this.state.open !== newState.open || this.state.check !== newState.check){
             return true
         }else{
             return false
@@ -78,6 +91,9 @@ class FileDetail extends React.Component{
         const {classes} = this.props
         if(!this.props.file){
             console.log("왼쪽 파일 상세설명 부");
+            this.setState({
+                check: false
+            })
             return(
                 <Grid item xs={12} className={classes.imageMag} align="center">
                         <img src="/data/nodata.jpg" className='imagectr'/>
@@ -86,14 +102,29 @@ class FileDetail extends React.Component{
         }else{   
             let extck = ext(this.props.file.extension)
             if(extck === "img"){
-                const filepath = `/data${this.props.path}/${this.props.file.name}`
+                const filepath = `/storege${this.props.path}/${this.props.file.name}`
                 console.log(`들어오고${filepath}`);
+                this.setState({
+                    check: false
+                })
                 return(
                     <Grid item xs={12}>
                         <img src={filepath} className='imagectr'/>
                     </Grid>
                 )
+            }else if(extck === 'video'){
+                this.setState({
+                    check: false
+                })
+                return(
+                    <Grid item xs={12} className={classes.imageMag} align="center">
+                            <img src="/data/istextdata.jpg" className='imagectr'/>
+                    </Grid>
+                    )
             }else{
+                this.setState({
+                    check: true
+                })
                 return(
                 <Grid item xs={12} className={classes.imageMag} align="center">
                         <img src="/data/istextdata.jpg" className='imagectr'/>
@@ -102,10 +133,44 @@ class FileDetail extends React.Component{
             }
         }
     }
+    daialClose(){
+        this.setState({
+            open : false
+        })
+    }
+    dialOpen(){
+        this.setState({
+            open : true
+        })
+    }
+    player(){
+        if(this.props.file != null){
+        let extck = ext(this.props.file.extension )
+        const {classes} = this.props;
+                if(extck === "img"){
+                    const filepath = `/storege${this.props.path}/${this.props.file.name}`
+                    console.log(`들어오고${filepath}`);
+                    return(
+                        <img className={classes.centerMedia} src={filepath}  width="640" height="auto"/>
+                    )
+                }else if(extck === 'video'){
+                    const filepath = `/storege${this.props.path}/${this.props.file.name}`
+                    return(
+                    <video className={classes.centerMedia} controls  width="640" height="480">
+                        <source src={filepath}></source>
+                    </video>
+                    )
+                    
+            }
+        }
+    }
+
+
 
     
     selfilestat(){
-        const {classes} = this.props
+        const {classes} = this.props;
+
         if(!this.props.file){
             return(
                 <Grid item xs={12}>
@@ -151,22 +216,33 @@ class FileDetail extends React.Component{
                             <ListItemText primary="파일크기(비트단위)" secondary={this.props.file.size}/>
                         </ListItem>
                     </List>
-
+                    <Button disabled={this.state.check} onClick={this.dialOpen}> 상세보기 </Button>
+                    
                 </Grid>
             )
         }
+        
     }
     /////////////////////////////////////////////////////////////////////////////////////////
 
     render(){
+        const {classes} = this.props;
         return(
             <Grid container>
                 {this.selfileimage()}
                 {this.selfilestat()}
+
+                <Dialog className={classes.dialog} open={this.state.open} onClose={event => this.daialClose()} fullWidth={true} maxWidth={"md"}>
+                        <DialogTitle>미리보기</DialogTitle>
+                            {this.player()}
+                        <DialogActions>
+                            <Button onClick={event => this.daialClose()}> 닫기 </Button>
+                        </DialogActions>
+                </Dialog>
             </Grid>
         )
+        }
     }
-}
 
 export default compose(withStyles(styles),connect((state)=>({
     file : state.SelectFile.file,

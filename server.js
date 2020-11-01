@@ -66,13 +66,25 @@ async function dbdataFW(req){
             let sql1 = "CREATE TABLE userspace(u_no INT(10) NOT NULL AUTO_INCREMENT,username VARCHAR(50) NOT NULL ,pass VARCHAR(50) NOT NULL,repo VARCHAR(50) NOT NULL ,admin INT(10) NOT NULL DEFAULT '0', PRIMARY KEY (u_no));"
             let sql2 = "create table sharespace( " +
                         "u_no INT(10) NOT NULL,"+
-                        "file_name varchar(50) NOT NULL,"+
-                        "file_path varchar(50) NOT NULL,"+
+                        "file_name LONGTEXT NOT NULL,"+
+                        "file_path LONGTEXT NOT NULL,"+
                         "share_date TIMESTAMP default CURRENT_TIMESTAMP,"+
                         "share_user varchar(50),"+
                         "PRIMARY KEY (u_no),"+
                         "FOREIGN KEY (u_no) REFERENCES userspace (u_no)"+
                         ")";
+            let sql3 = "CREATE TABLE extshare (" +
+                "`no` BIGINT(50) NOT NULL AUTO_INCREMENT," +
+                "`username` VARCHAR(50) NOT NULL COLLATE 'utf8_bin'," +
+                "`filename` LONGTEXT NOT NULL COLLATE 'utf8_bin',"+
+                "`filepath` LONGTEXT NOT NULL COLLATE 'utf8_bin',"+
+                "`filelink` LONGTEXT NOT NULL COLLATE 'utf8_bin',"+
+                "`password` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8_bin',"+
+                "`start_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"+
+               " `end_date` DATE NULL DEFAULT NULL,"+
+                "PRIMARY KEY (`no`)"+
+            ")COLLATE 'utf8_bin' ENGINE=InnoDB ROW_FORMAT=Dynamic AUTO_INCREMENT=53;";
+
             let username = req.body.userID;
             let pass = req.body.userPass;
             let repo = req.body.userID +"/";
@@ -83,6 +95,11 @@ async function dbdataFW(req){
                 }
             })
             await connection.query(sql2,(err, rows, fields)=>{
+                if(err){
+                    console.log(err);
+                }
+            })
+            await connection.query(sql3,(err, rows, fields)=>{
                 if(err){
                     console.log(err);
                 }
@@ -158,6 +175,7 @@ if(!fs.existsSync('./database.json')){
         console.log(`service On ${port}`)
         }
         )
+//////////////////////////////////////////////////////////////////
 }else{
 
     app.get('/api/check',(req,res)=>{
@@ -653,7 +671,6 @@ async function listexcute(req,res){
     var sql = 'select * from extshare where filelink=?'
     console.log("db 시작부");
      connection.query(sql,link,async (err,rows,filed)=>{
-         
         console.log("db 체킹부");
         if(rows.length != 0){
             console.log("db 반환부 0");
@@ -668,18 +685,21 @@ async function listexcute(req,res){
 // 여기까지가 링크 생성부
 //링크 채킹부
 app.post('/api/linkcheck',(req,res)=>{
+    console.log("여기는 체킹부");
     let sql = `select * from extshare where username=? and filename=? and filepath=?`;
     var username =req.body.username
     var filename = req.body.filename
     var filepath = req.body.filepath
     var param = [username,filename,filepath]
+    console.log(param);
     connection.query(sql,param,(err,rows,filed)=>{
         var data = new Object()
         if(rows.length != 0){
             console.log(rows[0].filename);
-            data.check = 1
+            data.check = true
             data.filename =  rows[0].filename
             data.filepath = rows[0].filepath
+            data.filelink = rows[0].filelink
             if(rows[0].password == ''){
                 data.pass = ''
             }else{
@@ -687,13 +707,19 @@ app.post('/api/linkcheck',(req,res)=>{
             }
             if(rows[0].end_date == ''){
                 data.date = ''
+                console.log(data);
                 res.send(data)
             }else{
-                data.date = rows[0].end_date
+                let date = new Date(rows[0].end_date);
+                let month = date.getMonth() + 1
+                let transdate = date.getFullYear() + '-' + month + '-' + date.getDate()
+                data.date = transdate
+                console.log(transdate);
                 res.send(data)
             }
         }else{
-            data.check = 0
+            data.filelink = ''
+            data.check = false
             res.send(data)
         }
         
@@ -704,12 +730,14 @@ app.post('/api/linkcheck',(req,res)=>{
 
 // update pass
 app.post('/api/shpass/',(req,res)=>{
+    console.log("들어옴");
     var sql = 'update extshare set password=? where username=? and filename=? and filepath=?'
     var password = req.body.password
     var username =req.body.username
     var filename = req.body.filename
     var filepath = req.body.filepath
     var param = [password,username,filename,filepath]
+    console.log(param);
     connection.query(sql,param,(err)=>{
         if(err){
             console.log(err);
@@ -722,12 +750,14 @@ app.post('/api/shpass/',(req,res)=>{
 
 // update enddate
 app.post('/api/shdate',(req,res)=>{
+    console.log("들어옴");
     var sql = 'update extshare set end_date=? where username=? and filename=? and filepath=?'
     var date = req.body.date
     var username =req.body.username
     var filename = req.body.filename
     var filepath = req.body.filepath
     var param = [date,username,filename,filepath]
+    console.log(param);
     connection.query(sql,param,(err)=>{
         if(err){
             console.log(err);
@@ -748,9 +778,9 @@ app.post('/api/shdel',(req,res)=>{
     connection.query(sql,param,(err)=>{
         if(err){
             console.log(err);
-            res.send("0");
+            res.send("no");
         }else{
-            res.send("1")
+            res.send("ok")
         }
     })
 })
@@ -758,20 +788,40 @@ app.post('/api/shdel',(req,res)=>{
 // download page get
 app.get('/api/extview/:id',(req,res)=>{
     let sql = `select * from extshare where filelink=${req.params.id}`;
-    console.log(req.params.id);
     connection.query(sql,(err,rows,filed)=>{
-        console.log(rows[0].filename);
-        var data = new Object()
-        data.filename =  rows[0].filename
-        data.filepath = rows[0].filepath
-        if(rows[0].password == ''){
-            data.pass = ''
+        if(rows.length == 0){
+            var data = new Object()
+            data.isnone = 1;
+            console.log(data);
             res.send(data)
         }else{
-            data.pass = rows[0].password
-            res.send(data)
+            
+            var data = new Object()
+            
+            data.filename =  rows[0].filename
+            
+            data.filepath = rows[0].filepath
+            
+            data.isnone = 0;
+            if(rows[0].filename.split('.')[1] != null){
+                
+                data.extension = rows[0].filename.split('.')[1];
+            }else{
+                
+                data.extension = 'no'
+            }
+
+            if(rows[0].password == null){
+                console.log("비번 존재X");
+                data.pass = ''
+                res.send(data)
+            }else{
+                console.log("비번 존재");
+                data.pass = rows[0].password
+                res.send(data)
+            }
+            console.log(data);
         }
-        console.log(data);
     })
 })
 
@@ -797,6 +847,7 @@ app.delete('/api/delete/:username',(req,res)=>{
 // 우리는 파일자체를 가져가야 되기떄문에 해당 내용은 나중에 서버에서
 // 로고파일 가져갈때 사용하기
 app.use('/data',express.static('./serverImage'));
+app.use('/storege',express.static('./upload'))
 
 
 
