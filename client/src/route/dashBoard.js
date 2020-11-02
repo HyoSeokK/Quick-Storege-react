@@ -21,15 +21,18 @@ import CloudService from './cloudService';
 import Adminpage from './adminpage'
 import ShareUser from './sharepage'
 import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
-import {Redirect} from 'react-router-dom';
+import {Redirect, withRouter} from 'react-router-dom';
 
 class FileSystem extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            loginuser : this.props.loginuser
+            loginuser : this.props.loginuser,
+            change : 0
         }
         this.logout = this.logout.bind(this);
+        this.renderMenu =this.renderMenu.bind(this)
+        this.change = this.change.bind(this)
     }
     logout(){
         window.sessionStorage.removeItem('user');
@@ -37,15 +40,44 @@ class FileSystem extends React.Component{
         this.props.SelFile.notFile();
         this.props.logoutfunc();
     }
-    ListItemLink(props) {
-        return <ListItem button component="a" {...props} />;
-      }
+    // ListItemLink(props) {
+    //     return <ListItem button component="a" {...props} />;
+    //   }
 
     componentWillMount(){
+        
         this.setState({
             loginuser : window.sessionStorage.getItem('user')
         })
     }
+    
+    change(g){
+        this.setState({
+            change : g
+        })
+    }
+    shouldComponentUpdate(nextProps,nextState){
+        if(this.state.change != nextState.change){
+            return true
+        }
+    }
+    renderMenu(){
+        if(this.state.change == 1){
+            return(
+                <ShareUser/>
+            )
+        }else if(this.state.change==2){
+            return(
+                <Adminpage/>   
+            )
+        }else if(this.state.change==0){
+            return(
+                <CloudService/>
+            )
+            
+        }
+    }
+
     render(){
         console.log(this.state.loginuser);
         return(
@@ -54,13 +86,15 @@ class FileSystem extends React.Component{
                 <Grid container spacing={1}>
                     <Grid item xs>
                         <List component="nav" aria-label="main mailbox folders">
-                            <ListItem button component={Link} to="/dashboard/">
+                            <ListItem button onClick={event=>this.change(0)}>
+                                {/* component={Link} to="/dashboard/"  */}
                             <ListItemIcon>
                                 <InboxIcon />
                             </ListItemIcon>
                             <ListItemText primary="내 파일" />
                             </ListItem>
-                            <ListItem button component={Link} to="/dashboard/shareuser">
+                            <ListItem button component={Link} onClick={event=>this.change(1)}>
+                                {/* href="/dashboard/shareuser" to="/dashboard/shareuser"  */}
                                 <ListItemIcon>
                                     <ShareIcon />
                                 </ListItemIcon>
@@ -70,7 +104,8 @@ class FileSystem extends React.Component{
                         <Divider />
                         <List component="nav" aria-label="secondary mailbox folders">
                             {window.sessionStorage.getItem("admin")==1 &&
-                            <ListItem button component={Link} to="/dashboard/admin">
+                            <ListItem button onClick={event=>this.change(2)}>
+                                {/* component={Link} href="/dashboard/admin" to="/dashboard/admin"  */}
                                 <ListItemIcon>
                                     <PersonIcon />
                                 </ListItemIcon>
@@ -86,15 +121,16 @@ class FileSystem extends React.Component{
                         </List>
                     </Grid>
                     <Grid item xs={10}>
-                        <Router>
+                        {/* <Router>
                             <Switch>
-                                <Route exact path="/" component={()=> <CloudService />}/>
-                                <Route exact path="/dashboard" component={()=> <CloudService />}/>
-                                <Route exact path="/dashboard/" component={()=> <CloudService />}/>
-                                <Route exact path="/dashboard/shareuser" component={()=><ShareUser/>}/>
-                                <Route exact path="/dashboard/admin" component={()=><Adminpage />}/>
+                                <Route exact path="/dashboard/shareuser" component={ShareUser}/>
+                                <Route exact path="/dashboard/admin" component={Adminpage}/>
+
+                                <Route exact path="/dashboard" component={()=><CloudService/>}/>
+                                <Route exact path="/dashboard/" component={()=><CloudService/>}/>
                             </Switch>
-                        </Router>
+                        </Router> */}
+                        {this.renderMenu()}
                     </Grid>
                 </Grid>
             </div>

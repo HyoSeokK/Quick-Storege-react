@@ -23,6 +23,7 @@ export default class Adminpage extends Component{
         this.handleManageOpen = this.handleManageOpen.bind(this);
         this.handleManageClose = this.handleManageClose.bind(this);
         this.handleInsert = this.handleInsert.bind(this);
+        this.hostlinkChange = this.hostlinkChange.bind(this);
         this.state ={
             open : false,
             userid : '',
@@ -30,7 +31,11 @@ export default class Adminpage extends Component{
             check : '',
             openModal : false,
             manage : false,
-            inserting : 0
+            inserting : 0,
+
+            addresslink : 'http://도메인명:포트번호',
+            updateLoading : false,
+            alertupdate : 0
         };
     }
     handleInsert(){
@@ -128,6 +133,18 @@ export default class Adminpage extends Component{
             )
         }
     }
+    async hostlinkChange(){
+        this.setState({
+            updateLoading : true,
+            alertupdate : 0
+        })
+        let data=await Axios.put('/api/config',{hostlink:this.state.addresslink})
+        this.setState({
+            updateLoading : false,
+            alertupdate : 1
+        })
+    }
+
 
     render(){
         return(
@@ -177,6 +194,17 @@ export default class Adminpage extends Component{
                         시스템 자원사용량 표시
                     </Typography>
                     <CPUMemUsage />
+                </Paper>
+                <Paper style={{padding:"20px" ,margin:"20px"}}>
+                    <Typography variant="h4" component="h2">
+                        <b>서버 도메인 지정</b>
+                    </Typography>
+                    <Typography variant="h5" component="h5">
+                        <b>외부링크 생성시 나오는 내부 링크</b>
+                    </Typography>
+                    <TextField type="text" label="UserName" name="addresslink" value={this.state.addresslink} onChange={this.handleValue} fullWidth={true}/><br/>
+                    <Button onClick={event => this.hostlinkChange()} disabled={this.state.updateLoading} color="primary">링크 재지정</Button>
+                    {this.state.alertupdate == 1 ? <div>정상적으로 업데이트 가 되었습니다</div> : <div></div>}
                 </Paper>
             </Grid>
         )

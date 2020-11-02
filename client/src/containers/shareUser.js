@@ -41,9 +41,11 @@ class InShare extends React.Component {
             date : '',
             check : false,
             link : '',
+            hostlink : '',
             extload : false,
             uphandler : 0,
             mindate : ''
+
         };
     }
     async datareturn(){
@@ -53,9 +55,11 @@ class InShare extends React.Component {
         })
         var loguser = window.sessionStorage.getItem('user')
         let data = await Axios.post(innerurl,{filename:this.props.file,user:loguser})
+        let linkdata = await Axios.get('/api/getlink')
         await this.setState({
             userlist:data.data,
             loading : 0,
+            hostlink : linkdata.data.hostlink
         })
         console.log(data);
         console.log(this.state.userlist);
@@ -388,7 +392,7 @@ class InShare extends React.Component {
                 >
                     <Alert severity="success">
                         <AlertTitle>공유 시작</AlertTitle>
-                        림크 : http://localhost:8080/Linkview/{this.state.link}
+                        림크 : {this.state.hostlink}/Linkview/{this.state.link}
                     </Alert>
                 </Grow>
             )

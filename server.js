@@ -85,6 +85,11 @@ async function dbdataFW(req){
                 "PRIMARY KEY (`no`)"+
             ")COLLATE 'utf8_bin' ENGINE=InnoDB ROW_FORMAT=Dynamic AUTO_INCREMENT=53;";
 
+            let sql4 =" CREATE TABLE `config` ("+
+            "    `hostlink` MEDIUMTEXT NULL"+
+           " )"+
+            "COLLATE='utf8_general_ci';";
+
             let username = req.body.userID;
             let pass = req.body.userPass;
             let repo = req.body.userID +"/";
@@ -104,6 +109,11 @@ async function dbdataFW(req){
                     console.log(err);
                 }
             })
+            await connection.query(sql4,(err, rows, fields)=>{
+                if(err){
+                    console.log(err);
+                }
+            })
 
             let sql = 'INSERT INTO userspace (username,pass,repo,admin) VALUES (?,?,?,1);'
             await connection.query(sql,param,(err, rows, fields)=>{
@@ -115,6 +125,10 @@ async function dbdataFW(req){
                     console.log("성공");
                     process.exit(1)
                 }
+            })
+            let config = `INSERT INTO config (hostlink) VALUES ('http://localhost:8080');`
+            await connection.query(config,param,(err, rows, fields)=>{
+               
             })
 }
 
@@ -370,7 +384,7 @@ app.post('/api/list/',(req,res)=>{
                     /////////////////////////////////////////////////
                     file.isFile = stats.isFile()
                     file.size = stats.size;
-                    file.extension = p.split('.')[1];
+                    file.extension = p.split('.')[p.split('.').length - 1];
                     list.push(file)
                 }
                  if(id == data.length - 1){
@@ -805,12 +819,11 @@ app.get('/api/extview/:id',(req,res)=>{
             data.isnone = 0;
             if(rows[0].filename.split('.')[1] != null){
                 
-                data.extension = rows[0].filename.split('.')[1];
+                data.extension = rows[0].filename.split('.')[rows[0].filename.split('.').length -1];
             }else{
                 
                 data.extension = 'no'
             }
-
             if(rows[0].password == null){
                 console.log("비번 존재X");
                 data.pass = ''
@@ -824,6 +837,35 @@ app.get('/api/extview/:id',(req,res)=>{
         }
     })
 })
+
+app.put('/api/config',(req,res)=>{
+    let link = req.body.hostlink;
+    let sql =  'update config set hostlink=?'
+    
+    connection.query(sql,link,(err)=>{
+        if(err){
+            console.log(err);
+        }
+        res.send("ok")
+    })
+})
+
+app.get('/api/getlink',(req,res)=>{
+    let sql = 'select * from config';
+
+    connection.query(sql,(err,rows)=>{
+        if(rows.length == 0){
+            console.log("errrrrrrrr");
+        }
+        var data = new Object()
+        data.hostlink = rows[0].hostlink
+        res.send(data)
+
+    })
+})
+
+
+
 
 
 
