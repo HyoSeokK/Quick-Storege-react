@@ -62,6 +62,7 @@ class Installpage extends React.Component{
             check : 'not',
             passcheck : '0'
         }
+        this.intervalcheck = null
         this.handleValue = this.handleValue.bind(this)
         this.dbCheck = this.dbCheck.bind(this)
         this.dbcheckText = this.dbcheckText.bind(this)
@@ -176,7 +177,7 @@ class Installpage extends React.Component{
             }).catch((err)=>{
             })
             console.log("시작");
-            setInterval(this.serverisOn,50000);
+            this.intervalcheck = setInterval(this.serverisOn,5000);
             console.log("끝");
 
             }else{
@@ -189,6 +190,9 @@ class Installpage extends React.Component{
                 passcheck : "1"
             });
         }
+    }
+    componentWillUnmount(){
+        clearInterval(this.intervalcheck)
     }
 
     handleValue(e){
