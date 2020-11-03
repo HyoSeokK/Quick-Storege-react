@@ -263,7 +263,7 @@ var deleteFolderRecursive = function(path) {
   
       return {
           CPU:CPUload,
-          mem:100 - Math.round(OS.freemem()/OS.totalmem()*100)
+          mem:Math.round(OS.freemem()/OS.totalmem()*100)
       }       
   }
   // cpu데이터 사용량 전달
