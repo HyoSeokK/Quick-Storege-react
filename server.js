@@ -115,6 +115,10 @@ async function dbdataFW(req){
                 }
             })
 
+            let config = `INSERT INTO config (hostlink) VALUES ('http://localhost:8080');`
+            await connection.query(config,param,(err, rows, fields)=>{
+               
+            })
             let sql = 'INSERT INTO userspace (username,pass,repo,admin) VALUES (?,?,?,1);'
             await connection.query(sql,param,(err, rows, fields)=>{
                 if(err){
@@ -123,14 +127,14 @@ async function dbdataFW(req){
                     fst.mkdirsSync('./upload/');
                     fst.mkdirsSync('./upload/'+username);
                     console.log("성공");
-                    process.exit(1)
+                    
                 }
             })
-            let config = `INSERT INTO config (hostlink) VALUES ('http://localhost:8080');`
-            await connection.query(config,param,(err, rows, fields)=>{
-               
-            })
+
 }
+            
+            
+            
 
 
 if(!fs.existsSync('./database.json')){

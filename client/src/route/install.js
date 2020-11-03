@@ -198,8 +198,8 @@ class Installpage extends React.Component{
                         <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" type="password" variant='outlined' label="비밀번호 확인" name="admUserck" onChange={this.handleValue}></TextField>
                     </Box>
                     <Box border={1} title="관리자 설정" className={classes.box2}>
-                        <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="SQL주소" name="DBAdd" onChange={this.handleValue} value="127.0.0.1"></TextField>
-                        <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="SQL포트" name="DBAdd" onChange={this.handleValue} value="3306"></TextField>
+                        <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="SQL주소" name="DBAdd" onChange={this.handleValue} value={this.state.DBAdd}></TextField>
+                        <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="SQL포트" name="DBPort" onChange={this.handleValue} value={this.state.DBPort}></TextField>
                         <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="DB명" name="DBname" onChange={this.handleValue}></TextField>
                         <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" variant='outlined' label="DB유저 아이디" name="DBid" onChange={this.handleValue}></TextField>
                         <TextField id="outlined-basic" className={classes.textLine} fullWidth="true" type="password" variant='outlined' name="DBPass" label="DB유저비밀번호" onChange={this.handleValue}></TextField>
