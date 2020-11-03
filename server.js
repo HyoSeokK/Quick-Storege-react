@@ -6,7 +6,7 @@ const sleep = ms => {
 const express = require('express');
 const bodyparser = require('body-parser');
 const app = express();
-
+let connection;
 //process.env.PORT
 //환경 설정값중 PORT에 대한 내역이 있으면
 //PORT값으로 설정 아니면 5000으로 포트 지정
@@ -38,7 +38,7 @@ const { reset } = require('nodemon');
 //MariaDB와 MySql은 같이 사용이 가능하다는 것 기억하기
 //커넥터가 mysql이지만 동일하게 사용이 가능
 //database 설정값 가져오기
-async function dbdataFW(req){
+async function dbdataFW(req,res){
     await fs.writeFileSync('./database.json',`
         {
             "host" : "${req.body.host}",
@@ -54,7 +54,6 @@ async function dbdataFW(req){
         const dbdata = fs.readFileSync('./database.json');
             const db = JSON.parse(dbdata);
             const mariadb = require('mysql');
-            console.log(req.body);
             const connection = mariadb.createConnection({
                 host:db.host, 
                 port:db.port,
@@ -95,39 +94,44 @@ async function dbdataFW(req){
             let repo = req.body.userID +"/";
             let param = [username,pass,repo]
             await connection.query(sql1,(err, rows, fields)=>{
+                console.log("1");
                 if(err){
                     console.log(err);
                 }
             })
             await connection.query(sql2,(err, rows, fields)=>{
+                console.log("2");
                 if(err){
                     console.log(err);
                 }
             })
             await connection.query(sql3,(err, rows, fields)=>{
+                console.log("3");
                 if(err){
                     console.log(err);
                 }
             })
             await connection.query(sql4,(err, rows, fields)=>{
+                console.log("4");
                 if(err){
                     console.log(err);
                 }
             })
-
+            sleep(50000)
             let config = `INSERT INTO config (hostlink) VALUES ('http://localhost:8080');`
             await connection.query(config,param,(err, rows, fields)=>{
-               
+                console.log("5");
             })
             let sql = 'INSERT INTO userspace (username,pass,repo,admin) VALUES (?,?,?,1);'
             await connection.query(sql,param,(err, rows, fields)=>{
+                console.log("6");
                 if(err){
                     console.log(err);
                 }else{
                     fst.mkdirsSync('./upload/');
                     fst.mkdirsSync('./upload/'+username);
                     console.log("성공");
-                    
+                    res.send("done")
                 }
             })
 
@@ -137,9 +141,25 @@ async function dbdataFW(req){
             
 
 
-if(!fs.existsSync('./database.json')){
     app.get('/api/check',(req,res)=>{
-        res.send("not")
+        if(!fs.existsSync('./database.json')){
+            res.send("not");
+        }else{
+            
+            const dbdata = fs.readFileSync('./database.json');
+            const db = JSON.parse(dbdata);
+            const mariadb = require('mysql');
+            connection = mariadb.createConnection({
+                host:db.host, 
+                port:db.port,
+                user:db.user,
+                password:db.password,
+                database:db.database
+            });
+            connection.connect();
+            res.send("yes")
+        }
+        
     })
 
     app.post('/api/install',(req,res)=>{
@@ -156,18 +176,17 @@ if(!fs.existsSync('./database.json')){
         //     if(err) throw err;
         //     console.log("성공적");
         // })
-            dbdataFW(req)
+            dbdataFW(req,res)
             
     })
 
     app.post('/api/reset',(req,res)=>{
-        process.exit(1)
+        // process.exit(1)
     })
 
     app.post('/api/DBconn',(req,res)=>{
     
     const mariadb = require('mysql');
-    console.log(req.body);
     const connection = mariadb.createConnection({
         host:req.body.host, 
         port:req.body.port,
@@ -189,28 +208,14 @@ if(!fs.existsSync('./database.json')){
     })
 
 
-    app.listen(port, ()=> {
-        console.log(`service On ${port}`)
-        }
-        )
+    // app.listen(port, ()=> {
+    //     console.log(`service On ${port}`)
+    //     }
+    //     )
 //////////////////////////////////////////////////////////////////
-}else{
 
-    app.get('/api/check',(req,res)=>{
-        res.send("yes")
-    })
 
-    const dbdata = fs.readFileSync('./database.json');
-    const db = JSON.parse(dbdata);
-    const mariadb = require('mysql');
-    const connection = mariadb.createConnection({
-        host:db.host, 
-        port:db.port,
-        user:db.user,
-        password:db.password,
-        database:db.database
-    });
-    connection.connect();
+
     
 
 // 폴더 삭제 모듈
@@ -855,6 +860,7 @@ app.put('/api/config',(req,res)=>{
 })
 
 app.get('/api/getlink',(req,res)=>{
+    console.log("inlink");
     let sql = 'select * from config';
 
     connection.query(sql,(err,rows)=>{
@@ -917,5 +923,9 @@ app.post('/api/customers', upload.single('image'),(req,res)=>{
 app.listen(port, ()=> {
     console.log(`service On ${port}`);
     }
-    )
-}
+)
+
+
+
+
+

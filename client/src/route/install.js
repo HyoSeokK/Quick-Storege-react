@@ -45,6 +45,7 @@ class Installpage extends React.Component{
 
     constructor(props){
         super(props)
+        this.interval = null
         this.state={
             admUserID : '',
             admUserPass : '',
@@ -58,7 +59,7 @@ class Installpage extends React.Component{
             installck : true,
             checked : false,
             setChecked : false,
-            check : 'no',
+            check : 'not',
             passcheck : '0'
         }
         this.handleValue = this.handleValue.bind(this)
@@ -144,30 +145,40 @@ class Installpage extends React.Component{
 
     
     async serverisOn(){
+        console.log("작동중.....");
         await Axios.get('/api/check').then((response)=>{
             this.setState({
                 check : response.data
             })
         }).catch((err)=>{
         })
-        if(this.state.check=='yes'){
+        if(this.state.check =='yes'){
             this.props.settingOn()
+        }else if(this.state.check == 'not'){
+
         }
     }
     
     async setCloud(){
+        console.log("1");
         if(this.state.admUserPass && this.state.admUserck && this.state.admUserck){
+            console.log("2");
             if(this.state.admUserPass == this.state.admUserck){
+                console.log("3");
             const url = '/api/install'
             this.setState({
                 installck:true
             })
+            console.log("4");
             await Axios.post(url,{userID:this.state.admUserID,userPass:this.state.admUserPass,host : this.state.DBAdd, user : this.state.DBid , password:this.state.DBPass, port:this.state.DBPort, database:this.state.DBname}).then((response)=>{
                 console.log(response.data);
-                this.setState({ DBon : response.data})
+                
             }).catch((err)=>{
             })
-            setInterval(this.serverisOn(),50000);
+            console.log("시작");
+            setInterval(this.serverisOn,50000);
+            console.log("끝");
+
             }else{
                 this.setState({
                     passcheck : "2"
@@ -207,7 +218,7 @@ class Installpage extends React.Component{
                         {this.dbcheckText()}
                     </Box>
                     <Box className={classes.box3}>
-                        <Button color="default" variant="contained" className={classes.confirmd} disabled={this.state.installck} onClick={this.setCloud}>설치</Button>
+                        <Button color="default" variant="contained" className={classes.confirmd} disabled={this.state.installck} onClick={event=>this.setCloud()}>설치</Button>
                         {this.checkText()}
                     </Box>
                 </Paper>

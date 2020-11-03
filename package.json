@@ -3,8 +3,11 @@
     "version": "1.0.0",
     "scripts": {
         "client": "cd client && yarn start",
+        "clientli": "cd client && yarn startli",
         "server": "nodemon server.js",
-        "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+        "serverRe": "node server.js",
+        "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+        "startli": "concurrently --kill-others-on-fail \"yarn serverRe\" \"yarn clientli\""
     },
     "dependencies": {
         "body-parser": "^1.18.3",

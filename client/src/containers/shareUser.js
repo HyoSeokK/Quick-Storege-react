@@ -25,6 +25,7 @@ class InShare extends React.Component {
         this.renderuphandler = this.renderuphandler.bind(this);
         this.extdateupdate = this.extdateupdate.bind(this);
         this.extpassupdate = this.extpassupdate.bind(this);
+        this.linkreturn = this.linkreturn.bind(this);
         this.state={
             //공유자산
             file : this.props.file,
@@ -55,15 +56,27 @@ class InShare extends React.Component {
         })
         var loguser = window.sessionStorage.getItem('user')
         let data = await Axios.post(innerurl,{filename:this.props.file,user:loguser})
-        let linkdata = await Axios.get('/api/getlink')
+        
+        
+
         await this.setState({
             userlist:data.data,
-            loading : 0,
-            hostlink : linkdata.data.hostlink
+            loading : 0
         })
         console.log(data);
         console.log(this.state.userlist);
     }
+    async linkreturn(){
+        let linkdata = await Axios.get('/api/getlink')
+        await this.setState({
+            loading : 0,
+            hostlink : linkdata.data.hostlink
+        })
+
+    }
+
+
+
     async fileReturn(){
         let exturl = '/api/linkcheck'
         await this.setState({
@@ -122,7 +135,8 @@ class InShare extends React.Component {
                 file : nextProps.file,
                 uphandler : 0
             })
-            await this.fileReturn()
+            await this.fileReturn();
+            await this.linkreturn();
             await this.datareturn();
             return true;
         }else if(nextProps.file == ""){
