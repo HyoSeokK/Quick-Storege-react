@@ -178,7 +178,7 @@ class FileList extends React.Component{
     //       4. Dialog 형식의 팝업창이기 떄문에 창닫기 위해 openFaile
     async ceateFile(){
         let url = '/createforder/'
-        let check = Axios.post(url,{path:this.props.path,fordername:this.state.fordername})
+        let check = await Axios.post(url,{path:this.props.path,fordername:this.state.fordername})
         await this.getFFileList(this.props.path);
         this.setState({
             fordername : '',
