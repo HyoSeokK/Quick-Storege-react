@@ -345,11 +345,16 @@ class FileListDetail extends Component{
                     <TableCell>
                          {file.date}
                     </TableCell>
+
                     <TableCell>
-                     <IconButton aria-label="download" onClick={()=>this.filedownload(file.name)}>
-                         <GetAppIcon ></GetAppIcon>
-                     </IconButton>
-                        <IconButton aria-label="Delete" onClick={()=>this.deleteaction(file)}>
+                    {file.isFile ?
+                    <IconButton aria-label="download" onClick={()=>this.filedownload(file.name)}>
+                        <GetAppIcon ></GetAppIcon>
+                    </IconButton>
+                    :<div></div> }
+                     
+
+                    <IconButton aria-label="Delete" onClick={()=>this.deleteaction(file)}>
                         <DeleteIcon></DeleteIcon>
                      </IconButton>
                      {file.isFile ? 
