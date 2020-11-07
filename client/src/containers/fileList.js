@@ -179,8 +179,9 @@ class FileList extends React.Component{
     async ceateFile(){
         let url = '/createforder/'
         let check = Axios.post(url,{path:this.props.path,fordername:this.state.fordername})
-        this.getFFileList(this.props.path);
+        await this.getFFileList(this.props.path);
         this.setState({
+            fordername : '',
             open : false
         })
     }
